@@ -19,7 +19,7 @@ embed_layers = [10]
 grabber.start_streaming()
 
 for frame in grabber.stream():
-    results = model.predict(source=frame, stream=False, embed=embed_layers, imgsz=416)
+    results = model.predict(source=frame, stream=False, embed=embed_layers, imgsz=256, conf=0.5)
     res = results[0]
     embedding = res.embeddings[0]
     print("Embedding shape:", embedding.shape)
