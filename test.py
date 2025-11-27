@@ -4,7 +4,7 @@ from ultralytics import YOLO
 from wincam import DXCamera
 from input_manager import InputManager
 
-model = YOLO('./best.pt')
+model = YOLO('./yolo/best.pt')
 # results = model.predict('2025-11-14 23-20-46.mp4', save=True, imgsz=256, conf=0.5)
 # for i, (name, module) in enumerate(model.model.named_modules()):
 #     print(i, name, module)
@@ -15,6 +15,7 @@ window_title = 'Street Fighter 6'
 
 embed_layers = [10]
 input_manager = InputManager("./mai_combos.py")
+#TODO: implement: rl_model = RLModel()
 
 with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
     while True:
@@ -33,7 +34,6 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
 
         # TODO: implement pseudocode
-        # rl_model = RLModel()
         # prediction = rl_model.predict(results)
         # input_manager.update_facing(actor_bbox, opponenet_bbox)
         # input_manager.accept_prediction(prediction)
