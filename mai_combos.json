@@ -1,0 +1,78 @@
+{
+    "1": {
+        "name": "combo1",
+        "actions": [
+            "Lkick",
+            "Lkick",
+            "Lkick",
+            "Down",
+            "BackDown",
+            "Back",
+            "HPunch"
+        ],
+        "wait_frames": [
+            15,
+            15,
+            2,
+            2,
+            2,
+            2,
+            18
+        ],
+        "combo_breaks": [
+            1,
+            2,
+            3,
+            7
+        ]
+    },
+    "2": {
+        "name": "combo2",
+        "actions": [
+            "HPunch",
+            "Down",
+            "BackDown",
+            "Back",
+            "HPunch"
+        ],
+        "wait_frames": [
+            2,
+            2,
+            2,
+            2,
+            21
+        ]
+    },
+    "3": {
+        "name": "combo3",
+        "actions": [
+            "Down",
+            "FrontDown",
+            "Front",
+            "MPunch",
+            "HPunch"
+        ],
+        "wait_frames": [
+            2,
+            2,
+            2,
+            43
+        ]
+
+    },
+    "4": {
+        "name": "combo4",
+        "actions": [
+            "Down",
+            "Front",
+            "FrontDown",
+            "HKick"
+        ],
+        "wait_frames": [
+            2,
+            2,
+            2,
+            31
+        ]
+    }
+}
