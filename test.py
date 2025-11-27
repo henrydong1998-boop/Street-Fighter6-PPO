@@ -2,13 +2,9 @@
 import cv2
 from ultralytics import YOLO
 from wincam import DXCamera
-from input_manager import InputManager
+from input_manager import InputManager, filter_input
 
 model = YOLO('./yolo/best.pt')
-# results = model.predict('2025-11-14 23-20-46.mp4', save=True, imgsz=256, conf=0.5)
-# for i, (name, module) in enumerate(model.model.named_modules()):
-#     print(i, name, module)
-
 window_title = 'Street Fighter 6'
 # print(gw.getAllTitles())
 
@@ -34,10 +30,12 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
 
         # TODO: implement pseudocode
-        # prediction = rl_model.predict(results)
+        # predictions_unfiltered = rl_model.predict(results)
+        # predictions = filter_input(actor_state, opponent_state) * prediction_unfiltered
+        # prediction = argmax(predictions)
+        # somehow update rl_model with filter_input mask
         # input_manager.update_facing(actor_bbox, opponenet_bbox)
         # input_manager.accept_prediction(prediction)
         # input_manager.output_actions()
-
 
 cv2.destroyAllWindows()

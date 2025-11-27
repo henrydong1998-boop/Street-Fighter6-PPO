@@ -3,9 +3,9 @@ import json
 import time
 import keyboard
 
-def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
+def filter_input(actions_tag_player, actions_tag_opponent) -> list[int]:
     #TODO: finish function
-    return [True for i in range(16)]
+    return [1 for i in range(16)]
 
 InputKeys = {
     "LPunch":      "U",
