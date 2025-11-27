@@ -154,7 +154,7 @@ class InputManager:
                 release = (action_key[-1] == "R")
                 input_key = ""
                 if hold or release:
-                    action_key = action_key[: -2]
+                    action_key = action_key[: -1]
 
                 if action_key == "Front" or action_key == "Back":
                     input_key = InputKeys["Left"] if (action_key == "Front") != (self.facing_right) else InputKeys["Right"]
@@ -164,7 +164,7 @@ class InputManager:
                 if hold and not keyboard.is_pressed(input_key):
                     print(f"pressed {input_key}")
                     keyboard.press(input_key)
-                if release and keyboard.is_pressed(input_key):
+                if release:
                     print(f"released {input_key}")
                     keyboard.release(input_key)
                 if (not hold) and (not release):
@@ -176,7 +176,6 @@ class InputManager:
                 time.sleep(self.frame_time)
                 for key in to_release:
                     keyboard.release(key)
-                to_release = []
 
             if wait_frame != 0:
                 print(f"slept for {wait_frame * self.frame_time} seconds")
@@ -191,11 +190,13 @@ class InputManager:
 if __name__ == "__main__":
     manager = InputManager("./mai_combos.json")
     time.sleep(4)
-    manager.accept_prediction(1)
+    manager.accept_prediction(4)
     manager.output_actions()
-    manager.accept_prediction(1)
-    manager.output_actions()
-    manager.accept_prediction(1)
-    manager.output_actions()
-    manager.accept_prediction(1)
-    manager.output_actions()
+    # manager.accept_prediction(1)
+    # manager.output_actions()
+    # manager.accept_prediction(1)
+    # manager.output_actions()
+    # manager.accept_prediction(1)
+    # manager.output_actions()
+    # manager.accept_prediction(3)
+    # manager.output_actions()

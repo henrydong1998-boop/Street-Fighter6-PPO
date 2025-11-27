@@ -52,15 +52,22 @@
         "actions": [
             "Down",
             "Front_Down",
-            "Front",
-            "MPunch",
-            "HPunch"
+            "FrontH",
+            "MPunchH",
+            "HPunchH",
+            "MPunchR",
+            "HPunchR",
+            "FrontR"
         ],
         "wait_frames": [
+            1,
             2,
             2,
-            2,
-            43
+            0,
+            86,
+            1,
+            1,
+            1
         ],
         "combo_breaks": [
             -1
@@ -71,15 +78,19 @@
         "name": "combo4",
         "actions": [
             "Down",
-            "Front",
-            "Front_Down",
-            "HKick"
+            "FrontH",
+            "DownH",
+            "HKick",
+            "DownR",
+            "FrontR"
         ],
         "wait_frames": [
-            2,
-            2,
-            2,
-            31
+            1,
+            1,
+            1,
+            31,
+            1,
+            1
         ],
         "combo_breaks": [
             -1
