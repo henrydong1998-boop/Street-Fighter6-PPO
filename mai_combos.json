@@ -86,5 +86,19 @@
         "combo_breaks": [
             -1
         ]
+    },
+    "6": {
+        "name": "guard_down",
+        "actions": [
+            "BackH",
+            "DownH"
+        ],
+        "wait_frames": [
+            0,
+            10
+        ],
+        "combo_breaks": [
+            -1
+        ]
     }
 }
