@@ -74,5 +74,17 @@
             2,
             31
         ]
+    },
+    "5": {
+        "name": "guard",
+        "actions": [
+            "BackH"
+        ],
+        "wait_frames": [
+            10
+        ],
+        "combo_breaks": [
+            -1
+        ]
     }
 }

@@ -6,10 +6,25 @@ import json
 class InputFilter:
     pass
 
+class InputKeys(Enum):
+        LPunch = "U"
+        MPunch = "I"
+        HPunch = "O"
+        Drive = "P"
+        LKick = "H"
+        MKick = "J"
+        HKick = "K"
+        DriveImpact = "L"
+        Left = "A"
+        Down = "S"
+        Right = "D"
+        Up = " "
+
 class InputManager:
     input_list = []
     curr_combo = []
     combo_lists = []
+    hold_keys = []
     frame_time = 1000 / 60
 
     def config_read(self, config_file: str):
@@ -39,20 +54,6 @@ class InputManager:
         guard_lower = 15
         throw = 16
 
-    class InputKeys(Enum):
-        LPunch = "U"
-        MPunch = "I"
-        HPunch = "O"
-        Drive = "P"
-        LKick = "H"
-        MKick = "J"
-        HKick = "K"
-        DriveImpact = "L"
-        Left = "A"
-        Down = "S"
-        Right = "D"
-        Up = " "
-
     def is_combo_action(self, action: InputClass | None):
         if action is None:
             return False
@@ -70,4 +71,5 @@ class InputManager:
             return
         last_action = self.input_list[-1]
         if not self.is_combo_action(last_action):
-            self.action_keys = 
+            self.action_keys = self.input_list[last_action]
+            self.
