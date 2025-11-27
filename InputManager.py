@@ -112,7 +112,6 @@ class InputManager:
             self.input_list = []
             return
 
-        actions_from = 0
         if self.curr_combo_index >= len(curr_action_dict["combo_breaks"]) - 1:
             print(f"curr_combo_index was {self.curr_combo_index}, resetting to 0")
             self.curr_combo_index = 0

@@ -77,20 +77,18 @@
     "4": {
         "name": "combo4",
         "actions": [
-            "Down",
             "FrontH",
+            "FrontR",
             "DownH",
-            "HKick",
-            "DownR",
-            "FrontR"
+            "FrontH_DownH_HKickH",
+            "FrontR_DownR_HKickR"
         ],
         "wait_frames": [
-            1,
-            1,
-            1,
-            31,
-            1,
-            1
+            5,
+            2,
+            5,
+            10,
+            31
         ],
         "combo_breaks": [
             -1
