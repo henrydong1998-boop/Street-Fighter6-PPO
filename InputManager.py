@@ -4,14 +4,15 @@ import time
 import keyboard
 
 def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
-    pass
+    #TODO: finish function
+    return [True for i in range(16)]
 
 InputKeys = {
     "LPunch":      "U",
     "MPunch":      "I",
     "HPunch":      "O",
     "DriveGuard":  "P",
-    "Kick":        "H",
+    "LKick":       "H",
     "MKick":       "J",
     "HKick":       "K",
     "DriveImpact": "L",
@@ -104,11 +105,23 @@ class InputManager:
             wait_times = curr_action_dict["wait_frames"][0: actions_until]
             self.act_and_wait(actions, wait_times)
             self.release_all_keys()
+            self.input_list = []
             return
 
-        if self.curr_combo_index == len(curr_action_dict["combo_breaks"]):
-            #TODO: Finish function
-            pass
+        actions_from = 0
+        if self.curr_combo_index >= len(curr_action_dict["combo_breaks"]) - 1:
+            self.curr_combo_index = 0
+        else:
+            self.curr_combo_index = self.curr_combo_index + 1
+        #TODO: Finish function
+        if self.curr_combo_index >= 1:
+            actions_from = curr_action_dict["combo_breaks"][self.curr_combo_index - 1]
+        actions_until = curr_action_dict["combo_breaks"][self.curr_combo_index]
+        actions = curr_action_dict["actions"][actions_from: actions_until]
+        wait_times = curr_action_dict["wait_frames"][actions_until: actions_until]
+        self.act_and_wait(actions, wait_times)
+        self.input_list = []
+        return
 
     def release_all_keys(self) -> None:
         for input_key in InputKeys.values():
