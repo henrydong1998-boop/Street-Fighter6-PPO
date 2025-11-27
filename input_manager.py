@@ -12,7 +12,7 @@ InputKeys = {
     "MPunch":      "I",
     "HPunch":      "O",
     "DriveGuard":  "P",
-    "LKick":       "h",
+    "LKick":       "H",
     "MKick":       "J",
     "HKick":       "K",
     "DriveImpact": "L",
@@ -26,7 +26,6 @@ class InputManager:
     NUM_CLASSES = 16
     input_list: list["InputClass"] = []
     combo_lists = {}
-    hold_keys = []
     curr_combo_action = None
     curr_combo_index = -1
     frame_time = None
@@ -185,17 +184,3 @@ class InputManager:
             #     print(f"releaseing key {key}")
             #     keyboard.release(key)
         return
-
-if __name__ == "__main__":
-    manager = InputManager("./mai_combos.json")
-    time.sleep(4)
-    manager.accept_prediction(4)
-    manager.output_actions()
-    # manager.accept_prediction(1)
-    # manager.output_actions()
-    # manager.accept_prediction(1)
-    # manager.output_actions()
-    # manager.accept_prediction(1)
-    # manager.output_actions()
-    # manager.accept_prediction(3)
-    # manager.output_actions()

@@ -1,5 +1,0 @@
-import keyboard
-import time
-actions = ['LKick', 'LKick', 'LKick', 'Down', 'Back_Down', 'Back', 'HPunch']
-
-print(actions[3: -1])

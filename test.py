@@ -2,6 +2,7 @@
 import cv2
 from ultralytics import YOLO
 from wincam import DXCamera
+from input_manager import InputManager
 
 model = YOLO('./best.pt')
 # results = model.predict('2025-11-14 23-20-46.mp4', save=True, imgsz=256, conf=0.5)
@@ -13,6 +14,7 @@ window_title = 'Street Fighter 6'
 
 
 embed_layers = [10]
+input_manager = InputManager("./mai_combos.py")
 
 with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
     while True:
@@ -23,11 +25,6 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
         # embedding = res.embeddings[0]
         for res in results:
             print(res.boxes)
-            # for box, cls, conf in zip(res.boxes.xyxy, res.boxes.cls, res.boxes.conf):
-            #     x1, y1, x2, y2 = map(int, box)
-            #     cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
-            #     cv2.putText(frame, f"{int(cls)}:{conf:.2f}", (x1, y1 - 10), 
-            #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1)
             for b in res.boxes:
                 x1, y1, x2, y2 = b.xyxy[0].int().tolist()
                 cls = int(b.cls[0])
@@ -35,8 +32,12 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
 
-        # cv2.imshow("Haha", frame)
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
+        # TODO: implement pseudocode
+        # rl_model = RLModel()
+        # prediction = rl_model.predict(results)
+        # input_manager.update_facing(actor_bbox, opponenet_bbox)
+        # input_manager.accept_prediction(prediction)
+        # input_manager.output_actions()
+
 
 cv2.destroyAllWindows()
