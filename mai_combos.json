@@ -2,18 +2,18 @@
     "1": {
         "name": "combo1",
         "actions": [
-            "Lkick",
-            "Lkick",
-            "Lkick",
+            "LKick",
+            "LKick",
+            "LKick",
             "Down",
             "Back_Down",
             "Back",
             "HPunch"
         ],
         "wait_frames": [
-            15,
-            15,
-            2,
+            14,
+            14,
+            10,
             2,
             2,
             2,
@@ -23,7 +23,7 @@
             1,
             2,
             3,
-            7
+            -1
         ]
     },
     "2": {
@@ -43,7 +43,8 @@
             21
         ],
         "combo_breaks": [
-            1
+            1,
+            -1
         ]
     },
     "3": {

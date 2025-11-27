@@ -12,7 +12,7 @@ InputKeys = {
     "MPunch":      "I",
     "HPunch":      "O",
     "DriveGuard":  "P",
-    "LKick":       "H",
+    "LKick":       "h",
     "MKick":       "J",
     "HKick":       "K",
     "DriveImpact": "L",
@@ -67,12 +67,12 @@ class InputManager:
 
     def get_action_dict(self, action: InputClass) -> dict:
         assert(action.name in self.combo_lists.keys())
-        return self.combo_list[action.name]
+        return self.combo_lists[action.name]
 
     def is_combo_action(self, action: InputClass | None) -> bool:
         if action is None:
             return False
-        if action in range(1, 8):
+        elif action.value in range(1, 8):
             return True
         return False
 
@@ -94,13 +94,17 @@ class InputManager:
             return
         last_action = self.input_list[-1]
         curr_action_dict = self.get_action_dict(last_action)
+        print(f"curr dict is {curr_action_dict}")
         if (not self.is_combo_action(last_action)) or \
            (not self.is_combo_action(self.curr_combo_action)) or \
            (last_action != self.curr_combo_action) or \
            (curr_action_dict["combo_breaks"][0] == -1):
-            self.curr_combo_name = last_action
+            print("first action of combo")
+            self.curr_combo_action = last_action
             self.curr_combo_index = 0
             actions_until = curr_action_dict["combo_breaks"][self.curr_combo_index]
+            if actions_until == -1:
+                actions_until = len(curr_action_dict["actions"])
             actions = curr_action_dict["actions"][0: actions_until]
             wait_times = curr_action_dict["wait_frames"][0: actions_until]
             self.act_and_wait(actions, wait_times)
@@ -110,15 +114,20 @@ class InputManager:
 
         actions_from = 0
         if self.curr_combo_index >= len(curr_action_dict["combo_breaks"]) - 1:
+            print(f"curr_combo_index was {self.curr_combo_index}, resetting to 0")
             self.curr_combo_index = 0
         else:
             self.curr_combo_index = self.curr_combo_index + 1
-        #TODO: Finish function
+            print(f"incrementing curr_combo_index to {self.curr_combo_index}")
+
         if self.curr_combo_index >= 1:
             actions_from = curr_action_dict["combo_breaks"][self.curr_combo_index - 1]
         actions_until = curr_action_dict["combo_breaks"][self.curr_combo_index]
+        if actions_until == -1:
+            actions_until = len(curr_action_dict["actions"])
+        print(f"performing actions from {actions_from} to {actions_until}")
         actions = curr_action_dict["actions"][actions_from: actions_until]
-        wait_times = curr_action_dict["wait_frames"][actions_until: actions_until]
+        wait_times = curr_action_dict["wait_frames"][actions_from: actions_until]
         self.act_and_wait(actions, wait_times)
         self.input_list = []
         return
@@ -130,15 +139,19 @@ class InputManager:
         return
 
     def act_and_wait(self, actions: list[str], wait_frames: list[int]) -> None:
+        print(f"actions: {actions}")
+        print(f"wait_times: {wait_frames}")
         assert len(actions) == len(wait_frames)
         for index in range(len(actions)):
             action = actions[index]
             wait_frame = wait_frames[index]
             action_keys = action.split("_")
+            print(f"action_keys: {action_keys}")
+            to_release = []
 
             for action_key in action_keys:
-                hold = (action[-1] == "H")
-                release = (action[-1] == "R")
+                hold = (action_key[-1] == "H")
+                release = (action_key[-1] == "R")
                 input_key = ""
                 if hold or release:
                     action_key = action_key[: -2]
@@ -146,21 +159,43 @@ class InputManager:
                 if action_key == "Front" or action_key == "Back":
                     input_key = InputKeys["Left"] if (action_key == "Front") != (self.facing_right) else InputKeys["Right"]
                 else:
-                    input_key = InputKeys[action]
+                    input_key = InputKeys[action_key]
 
                 if hold and not keyboard.is_pressed(input_key):
+                    print(f"pressed {input_key}")
                     keyboard.press(input_key)
                 if release and keyboard.is_pressed(input_key):
+                    print(f"released {input_key}")
                     keyboard.release(input_key)
                 if (not hold) and (not release):
-                    keyboard.press_and_release(input_key)
+                    keyboard.press(input_key)
+                    to_release.append(input_key)
+                    print(f"pressed and released {input_key}")
+
+            if len(to_release)!= 0:
+                time.sleep(self.frame_time)
+                for key in to_release:
+                    keyboard.release(key)
+                to_release = []
 
             if wait_frame != 0:
+                print(f"slept for {wait_frame * self.frame_time} seconds")
+                print(f"wait frames is {wait_frame}")
+                print(f"frame time is {self.frame_time}")
                 time.sleep(wait_frame * self.frame_time)
+            # for key in pressed:
+            #     print(f"releaseing key {key}")
+            #     keyboard.release(key)
         return
 
 if __name__ == "__main__":
     manager = InputManager("./mai_combos.json")
-    for key, value in manager.combo_lists.items():
-        print(f"key: {key}")
-        print(f"value: {value}")
+    time.sleep(4)
+    manager.accept_prediction(1)
+    manager.output_actions()
+    manager.accept_prediction(1)
+    manager.output_actions()
+    manager.accept_prediction(1)
+    manager.output_actions()
+    manager.accept_prediction(1)
+    manager.output_actions()
