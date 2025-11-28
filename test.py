@@ -10,7 +10,7 @@ window_title = 'Street Fighter 6'
 
 
 embed_layers = [10]
-input_manager = InputManager("./mai_combos.py")
+input_manager = InputManager("./mai_combos.json")
 #TODO: implement: rl_model = RLModel()
 
 with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
@@ -28,13 +28,24 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
                 conf = float(b.conf[0])
 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
+                if cls < 10:
+                    opponent_state = cls
+                    actor_bbox = [x1, x2, y1, y2]
+                elif cls >= 10 and cls < 20:
+                    actor_state = cls
+                    opponenet_bbox = [x1, x2, y1, y2]
+                    
+                    
+        embed_layers = [10]
+        embed = model.predict(frame, embed=embed_layers)        
+        
 
         # TODO: implement pseudocode
         # predictions_unfiltered = rl_model.predict(results)
         # predictions = filter_input(actor_state, opponent_state) * prediction_unfiltered
         # prediction = argmax(predictions)
         # somehow update rl_model with filter_input mask
-        # input_manager.update_facing(actor_bbox, opponenet_bbox)
+        input_manager.update_facing(actor_bbox, opponenet_bbox)
         # input_manager.accept_prediction(prediction)
         # input_manager.output_actions()
 
