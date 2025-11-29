@@ -3,6 +3,9 @@ import cv2
 from ultralytics import YOLO
 from wincam import DXCamera
 from input_manager import InputManager, filter_input
+from utils import update_buffer_svd, random_projection
+import torch
+
 
 model = YOLO('./yolo/best.pt')
 window_title = 'Street Fighter 6'
@@ -14,6 +17,8 @@ input_manager = InputManager("./mai_combos.json")
 #TODO: implement: rl_model = RLModel()
 
 with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
+    buffer = torch.zeros(0, 256)
+    
     while True:
         frame, _ = camera.get_bgr_frame()
         results = model.predict(frame, imgsz=256, conf=0.5)
@@ -43,7 +48,11 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
                     
                     
         embed_layers = [10]
-        embed = model.predict(frame, embed=embed_layers)[0]   
+        embed = model.predict(frame, embed=embed_layers)[0]  
+        
+        buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=6, out_dim=32)
+        
+        embed = random_projection(embed=embed, out_dim=64, file="random_projection_256_64.npy")
         
 
         # TODO: implement pseudocode
