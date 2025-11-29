@@ -47,6 +47,12 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
         
 
         # TODO: implement pseudocode
+        # 
+        # 可以获得的变量有 actor_state, opponent_state, projectile_state, actor_bbox, opponent_bbox, projectile_bbox,embed
+        # *_bbox 是2维数组，Nx4，表示检测到的该类别物体的边界框,绝大多数情况下N=1，可以拿到对手和自己的bbox 一共 8个值
+        # *_state 是整数，表示检测到的该类别物体的状态
+        # embed 是embedding向量，可以作为RL模型的输入之一 [256维]
+        # 
         # predictions_unfiltered = rl_model.predict(results)
         # predictions = filter_input(actor_state, opponent_state) * prediction_unfiltered
         # prediction = argmax(predictions)
