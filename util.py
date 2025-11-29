@@ -12,12 +12,12 @@ def update_buffer_svd(buffer, new_embed, window_size=4, out_dim=64):
     if buffer.size(0) >= 2:
         buffer_np = buffer.cpu().numpy()
         svd = TruncatedSVD(n_components=min(out_dim, buffer_np.shape[0]), random_state=42)
-        X64 = svd.fit_transform(buffer_np)
-        X64 = torch.from_numpy(X64)
+        cache = svd.fit_transform(buffer_np)
+        cache = torch.from_numpy(cache)
     else:
-        X64 = None
+        cache = None
 
-    return buffer, X64
+    return buffer, cache
 
 
 def random_projection(embed, out_dim=64, file="random_projection.npy", seed=42):
