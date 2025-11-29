@@ -20,6 +20,9 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
         # embed = model(frame, embed=embed_layers)[0]
         # res = results[0]
         # embedding = res.embeddings[0]
+        projectile_state_bbox = []
+        opponenet_bbox = []
+        actor_bbox = []
         for res in results:
             print(res.boxes)
             for b in res.boxes:
@@ -30,14 +33,17 @@ with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
                 if cls < 10:
                     opponent_state = cls
-                    actor_bbox = [x1, x2, y1, y2]
+                    actor_bbox.append([x1, x2, y1, y2])
                 elif cls >= 10 and cls < 20:
                     actor_state = cls
-                    opponenet_bbox = [x1, x2, y1, y2]
+                    opponenet_bbox.append([x1, x2, y1, y2])
+                else:
+                    projectile_state = cls
+                    projectile_state_bbox.append([x1, x2, y1, y2])
                     
                     
         embed_layers = [10]
-        embed = model.predict(frame, embed=embed_layers)        
+        embed = model.predict(frame, embed=embed_layers)[0]   
         
 
         # TODO: implement pseudocode
