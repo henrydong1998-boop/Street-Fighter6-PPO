@@ -2,6 +2,7 @@ import numpy as np
 import time
 from CV_test import CV_test
 import input_manager as inpm
+from ultralytics import YOLO
 
 class SFEnv:
     """
@@ -13,21 +14,26 @@ class SFEnv:
 
     def __init__(self):
         self.itr = 0
-        self.input_manager = inpm.InputManager
+        self.input_manager = inpm.InputManager("./mai_combos.json")
 
         # ---- Action & observation spaces ----
         self.action_space = np.array([e.value for e in self.input_manager.InputClass], dtype=int)
 
-        self.obs_dim = CV_test().shape[0]
-        self.obs
+        self.obs = None
+
+        self.model = YOLO('./yolo/best.pt')
+        self.model1 = YOLO('./yolo/best2.pt')
+
+        self.obs_dim = CV_test(self.model,self.model2,self.input_manager).shape[0]
+
 
     def _get_obs(self):
-        obs=CV_test()
+        obs=CV_test(self.model,self.model2,self.input_manager)
         return obs
     
 
     def reset(self):
-        obs=CV_test()
+        obs=CV_test(self.model,self.model2,self.input_manager)
         self.itr = 0
         return obs
 
@@ -36,7 +42,7 @@ class SFEnv:
         self.input_manager.accept_prediction(action)
         self.input_manager.output_actions()
         time.sleep(0.02)  # wait for environment to update
-        obs = self._get_obs()
+        self.obs = self._get_obs()
 
         # SF6 reward
         
