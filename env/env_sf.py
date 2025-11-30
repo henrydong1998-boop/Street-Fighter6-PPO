@@ -64,15 +64,29 @@ class SFEnv:
         # time.sleep(0.02)  # wait for environment to update
         self.obs = self._get_obs()
 
-        # SF6 reward
-        
+        # SF6 rewardasakssio
         reward_delt_health = 0
         reward_opn_delt_health = 0
         reward_atk = 0
         reward_gud = 0
         reward_miss = 0
-        reward = reward_delt_health + reward_opn_delt_health + reward_atk + reward_gud + reward_miss
+        reward_neutral = 0
 
+        if self.actor_state == 15:
+            reward_delt_health = -12
+        if self.opponent_state == 5:
+            reward_opn_delt_health = 16
+        if self.actor_state < 13 and self.actor_state >10:
+            reward_atk = 10
+        if self.actor_state == 13 or self.actor_state == 14:
+            reward_gud = 2
+        if self.opponent_state!=5 and self.actor_state >=10 and self.actor_state<15:
+            reward_miss = -2
+        if self.actor_state == 17:
+            reward_neutral = -8
+
+        reward = reward_delt_health + reward_opn_delt_health + reward_atk + reward_gud + reward_miss + reward_neutral
+        print(f"Reward:{reward}")
         done = False  # HalfCheetah never terminates early
 
         info = {"reward": reward}

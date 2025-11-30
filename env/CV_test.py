@@ -27,15 +27,15 @@ def CV_test(model,model2,input_manager):
         # embed = model(frame, embed=embed_layers)[0]
         # res = results[0]
         # embedding = res.embeddings[0]
-        projectile_bbox = []
-        opponent_bbox = []
-        actor_bbox = []
+        projectile_bbox = torch.zeros((1,4))
+        opponent_bbox = torch.zeros((1,4))
+        actor_bbox = torch.zeros((1,4))
         actor_state = -1
         opponent_state = -1
         projectile_state = -1
 
         for res in results:
-            print(res.boxes)
+            # print(res.boxes)
             for b in res.boxes:
                 x1, y1, x2, y2 = b.xyxy[0].int().tolist()
                 cls = int(b.cls[0])
@@ -45,13 +45,13 @@ def CV_test(model,model2,input_manager):
                 # cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
                 if cls < 10:
                     opponent_state = cls
-                    actor_bbox.append([x1, x2, y1, y2])
+                    actor_bbox = torch.tensor([x1, x2, y1, y2])
                 elif cls >= 10 and cls < 20:
                     actor_state = cls
-                    opponent_bbox.append([x1, x2, y1, y2])
+                    opponent_bbox = torch.tensor([x1, x2, y1, y2])
                 else:
                     projectile_state = cls
-                    projectile_bbox.append([x1, x2, y1, y2])
+                    projectile_bbox = torch.tensor([x1, x2, y1, y2])
                     
                     
         embed_layers = [10]
@@ -60,7 +60,7 @@ def CV_test(model,model2,input_manager):
         # buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=6, out_dim=32)
         
         embed = random_projection(embed=embed, out_dim=64, file="random_projection_256_64.npy")
-        
+        # print(embed)
 
         # TODO: implement pseudocode
         # 
@@ -78,8 +78,9 @@ def CV_test(model,model2,input_manager):
         # input_manager.output_actions()
 
     # cv2.destroyAllWindows()
-    print(actor_state)
+    # print(actor_state)
     CV_return=np.concatenate([np.array(actor_state).flatten(), np.array(opponent_state).flatten(), \
         np.array(projectile_state).flatten(), np.array(actor_bbox).flatten(),np.array(opponent_bbox).flatten(), \
-        np.array(projectile_bbox).flatten()])
+        np.array(projectile_bbox).flatten(),embed.cpu().numpy().flatten()])
+    # print(f"cv obs: {CV_return}")
     return CV_return, actor_state, opponent_state

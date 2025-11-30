@@ -102,6 +102,7 @@ class PPOAgent:
         """
         if isinstance(obs, np.ndarray):
             obs = torch.tensor(obs, dtype=torch.float32, device=self._device).unsqueeze(0)  # add batch dim
+        # print(f"obs: {obs}")
         dist, value = self.model.forward(obs)
         action = dist.sample()
         log_prob = dist.log_prob(action)
@@ -252,7 +253,7 @@ class PPOAgent:
         """
         Main training loop
         """
-        log_file = os.path.join("output", "trajectory_log.txt")
+        log_file = os.path.join("./output", "trajectory_log.txt")
         for update in range(total_updates):
             obs, actions, log_probs, returns, advantages = self.collect_trajectories(num_steps_per_update)
             self.ppo_update(obs, actions, log_probs, returns, advantages)
@@ -265,6 +266,6 @@ class PPOAgent:
             traj_length = len(returns)
             print(f"Update {update+1}/{total_updates} completed"+f" AVG Reward {total_reward/len(returns):.2f}")
             with open(log_file, "a") as f:
-                f.write(f"Update {update+1}, Total Reward: {total_reward:.2f}, Length: {traj_length}, Model: {model_file}\n")
+                f.write(f"Update {update+1}, AVG Reward {total_reward}/{len(returns):.2f}, Length: {traj_length}, Sample: {update*num_steps_per_update}\n")
     
 
