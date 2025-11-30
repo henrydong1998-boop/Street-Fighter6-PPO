@@ -9,10 +9,10 @@ import time
 # -------------------------------
 # Configuration
 # -------------------------------
-ENV_XML = "half_cheetah.xml"   # path to your MuJoCo XML
+# ENV_XML = "half_cheetah.xml"   # path to your MuJoCo XML
 OBS_DIM = 17                   # set appropriately (self.obs_dim)
-N_ACTIONS = 6                  # set appropriately (env.model.nu)
-IS_DISCRETE = False            # HalfCheetah is continuous
+N_ACTIONS = 16                  # set appropriately (env.model.nu)
+IS_DISCRETE = True            # HalfCheetah is continuous
 #DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 DEVICE = "cpu"
 
@@ -31,9 +31,10 @@ ENTROPY_COEF = 0.02
 # -------------------------------
 # Training function
 # -------------------------------
-def train_ppo(xml_path, total_updates, num_steps_per_update, model_save_path):
-    env = SFEnv(xml_path)
-    model = PPOModel(env.obs_dim, env.model.nu, IS_DISCRETE)
+def train_ppo( total_updates, num_steps_per_update, model_save_path):
+    env = SFEnv()
+    #print(env.action_space)
+    model = PPOModel(env.obs_dim, len(env.action_space), IS_DISCRETE)
     agent = PPOAgent(
         env,
         model,
@@ -117,11 +118,11 @@ def test_ppo(model_path="ppo_model.pth", xml_path="half_cheetah.xml", episodes=5
 # -------------------------------
 if __name__ == "__main__":
     # Example usage
-    xml_path = "half_cheetah.xml"
+    
     model_path = os.path.join("output")
 
     # Train
-    train_ppo(xml_path=xml_path, total_updates=1000, num_steps_per_update=2048, model_save_path=model_path)
+    train_ppo(  total_updates=1000, num_steps_per_update=2048, model_save_path=model_path)
 
     # Test
     #test_ppo(model_path=model_path, xml_path=xml_path, episodes=5, render=True)

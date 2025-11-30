@@ -108,7 +108,7 @@ class PPOAgent:
         if not self.model.is_discrete:
             log_prob = log_prob.sum(axis=-1)  # sum for multi-dimensional continuous actions
         #print("Sampled action:", action.cpu().numpy())
-        return action, log_prob, value
+        return action, log_prob, value, dist
 
     def evaluate_action(self, obs: torch.Tensor, action: torch.Tensor):
         """
@@ -144,9 +144,9 @@ class PPOAgent:
         obs = self._env.reset()
         for i in range(num_steps):
             with torch.no_grad():
-                action, log_prob, value = self.get_action(obs)
+                action, log_prob, value, dist = self.get_action(obs)
 
-            next_obs, reward, done, _ = self._env.step(action)
+            next_obs, reward, done, _ = self._env.step(dist)
             
             obs_list.append(torch.tensor(obs, dtype=torch.float32).unsqueeze(0))
             #action_list.append(torch.tensor(action, dtype=torch.float32).unsqueeze(0))

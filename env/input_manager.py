@@ -3,9 +3,9 @@ import json
 import time
 import keyboard
 
-def filter_input(actions_tag_player, actions_tag_opponent) -> list[int]:
+def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
     #TODO: finish function
-    return [1 for i in range(16)]
+    return [True for i in range(16)]
 
 InputKeys = {
     "LPunch":      "U",
@@ -77,7 +77,7 @@ class InputManager:
 
     def accept_prediction(self, prediction: int) -> None:
         assert prediction >= 0 and prediction <= self.NUM_CLASSES
-        prediction_class = self.InputClass(prediction)
+        prediction_class = self.InputClass(prediction + 1)
         self.input_list.append(prediction_class)
         return
 
@@ -180,7 +180,22 @@ class InputManager:
                 print(f"wait frames is {wait_frame}")
                 print(f"frame time is {self.frame_time}")
                 time.sleep(wait_frame * self.frame_time)
-            # for key in pressed:
-            #     print(f"releaseing key {key}")
-            #     keyboard.release(key)
         return
+
+if __name__ == "__main__":
+    time.sleep(5)
+    input_manager = InputManager("mai_combos.json")
+    input_manager.accept_prediction(9)
+    input_manager.output_actions()
+    # input_manager.accept_prediction(2)
+    # input_manager.output_actions()
+    # input_manager.accept_prediction(2)
+    # input_manager.output_actions()
+    # input_manager.accept_prediction(2)
+    # input_manager.output_actions()
+    # input_manager.accept_prediction(4)
+    # input_manager.output_actions()
+    # input_manager.accept_prediction(4)
+    # input_manager.output_actions()
+    # input_manager.accept_prediction(4)
+    # input_manager.output_actions()

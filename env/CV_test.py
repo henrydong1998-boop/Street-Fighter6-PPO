@@ -2,8 +2,8 @@
 import cv2
 from ultralytics import YOLO
 from wincam import DXCamera
-from input_manager import InputManager, filter_input
-from util import update_buffer_svd, random_projection
+from env.input_manager import InputManager, filter_input
+from env.util import update_buffer_svd, random_projection
 import torch
 import numpy as np
 
@@ -30,6 +30,10 @@ def CV_test(model,model2,input_manager):
         projectile_bbox = []
         opponent_bbox = []
         actor_bbox = []
+        actor_state = -1
+        opponent_state = -1
+        projectile_state = -1
+
         for res in results:
             print(res.boxes)
             for b in res.boxes:
@@ -74,7 +78,8 @@ def CV_test(model,model2,input_manager):
         # input_manager.output_actions()
 
     # cv2.destroyAllWindows()
+    print(actor_state)
     CV_return=np.concatenate([np.array(actor_state).flatten(), np.array(opponent_state).flatten(), \
         np.array(projectile_state).flatten(), np.array(actor_bbox).flatten(),np.array(opponent_bbox).flatten(), \
         np.array(projectile_bbox).flatten()])
-    return CV_return
+    return CV_return, actor_state, opponent_state
