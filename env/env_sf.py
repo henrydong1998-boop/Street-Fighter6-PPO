@@ -91,10 +91,6 @@ class SFEnv:
         delt_health = 0
         opn_delt_health = 0
 
-        if self.actor_health_history[-1] == 0 or self.opponent_health_history[-1] == 0:
-            self.actor_health_history = deque(maxlen=6)
-            self.opponent_health_history = deque(maxlen=6)
-
         if len(self.actor_health_history) > 1 and len(self.actor_health_history) < 6:
             delt_health = self.actor_health_history[-2] - self.actor_health_history[-1]
         elif len(self.actor_health_history) == 6:
@@ -108,7 +104,7 @@ class SFEnv:
                               sum(islice(self.opponent_health_history, 3, 6))
 
         reward_delt_health -= max(0, delt_health) * 200
-        reward_opn_delt_health += max(0, opn_delt_health) * 200
+        reward_opn_delt_health += max(0, opn_delt_health) * 120
 
         # award successful combo
         if self.input_manager.get_action_dict(inpm.InputClass(action + 1))["combo_breaks"][0] != -1:
@@ -124,7 +120,7 @@ class SFEnv:
         if self.actor_state in range(10, 13):
             reward_atk = 5
         if self.actor_state == 13 or self.actor_state == 14: # actor guard
-            reward_guard = 20
+            reward_guard = 50
         if self.opponent_state!=5 and self.actor_state >=10 and self.actor_state<15: # actor miss
             reward_miss = -10
 
@@ -143,11 +139,17 @@ class SFEnv:
                  reward_neutral + \
                  reward_combo
 
+        if self.actor_health_history[-1] == 0 or self.opponent_health_history[-1] == 0:
+            self.actor_health_history = deque(maxlen=6)
+            self.opponent_health_history = deque(maxlen=6)
+            reward = 0
+
         print(f"Reward:{reward}, delta_health: {reward_delt_health}, opponent delta_health: {reward_opn_delt_health}, passive: {reward_neutral}, guard: {reward_guard}")
         done = False  # HalfCheetah never terminates early
 
         info = {"reward": reward}
         self.itr = self.itr + 1
+
 
         return self.obs, reward, done, info
 

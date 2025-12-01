@@ -282,5 +282,3 @@ class PPOAgent:
             print(f"Update {update+1}/{total_updates} completed"+f" AVG Reward {total_reward/len(returns):.2f}")
             with open(log_file, "a") as f:
                 f.write(f"Update {update+1}, AVG Reward {total_reward}/{len(returns):.2f}, Length: {traj_length}, Sample: {update*num_steps_per_update}\n")
-    
-
