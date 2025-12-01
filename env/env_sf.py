@@ -88,6 +88,8 @@ class SFEnv:
         reward_miss = 0
         reward_neutral = 0
         reward_combo = 0
+        delt_health = 0
+        opn_delt_health = 0
 
         if self.actor_health_history[-1] == 0 or self.opponent_health_history[-1] == 0:
             self.actor_health_history = deque(maxlen=6)
@@ -141,7 +143,7 @@ class SFEnv:
                  reward_neutral + \
                  reward_combo
 
-        print(f"Reward:{reward}")
+        print(f"Reward:{reward}, delta_health: {reward_delt_health}, opponent delta_health: {reward_opn_delt_health}, passive: {reward_neutral}, guard: {reward_guard}")
         done = False  # HalfCheetah never terminates early
 
         info = {"reward": reward}
