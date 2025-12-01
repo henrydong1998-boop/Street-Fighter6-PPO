@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal, Categorical
+from datetime import datetime
 
 
 
@@ -253,13 +254,14 @@ class PPOAgent:
         """
         Main training loop
         """
-        log_file = os.path.join("./output", "trajectory_log.txt")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = os.path.join("./output", f"trajectory_log_{timestamp}.txt")
+        model_file = os.path.join("output", f"ppo_model_{timestamp}.pth")
         for update in range(total_updates):
             obs, actions, log_probs, returns, advantages = self.collect_trajectories(num_steps_per_update)
             self.ppo_update(obs, actions, log_probs, returns, advantages)
 
             # Save model after each trajectory
-            model_file = os.path.join("output", f"ppo_model.pth")
             torch.save(self.model.state_dict(), model_file)
             # Compute trajectory metrics
             total_reward = returns.sum().item()
