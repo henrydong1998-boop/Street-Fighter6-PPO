@@ -85,7 +85,7 @@ class InputManager:
     # return True for facing right, False for facing left
     def update_facing(self, actor_bbox: torch.Tensor, opponent_bbox: torch.Tensor) -> bool:
         empty_bbox = torch.zeros((1, 4))
-        if (torch.eq(actor_bbox, empty_bbox)) or (torch.eq(opponent_bbox, empty_bbox)):
+        if (torch.equal(actor_bbox, empty_bbox)) or (torch.equal(opponent_bbox, empty_bbox)):
             self.facing_right = True
             return self.facing_right
 

@@ -31,7 +31,7 @@ ENTROPY_COEF = 0.02
 # -------------------------------
 # Training function
 # -------------------------------
-def train_ppo( total_updates, num_steps_per_update, model_save_path):
+def train_ppo(total_updates, num_steps_per_update, model_save_path):
     env = SFEnv()
     #print(env.action_space)
     model = PPOModel(env.obs_dim, len(env.action_space), IS_DISCRETE)
@@ -46,7 +46,6 @@ def train_ppo( total_updates, num_steps_per_update, model_save_path):
         entropy_coef=ENTROPY_COEF,
         batch_size=BATCH_SIZE,
         epochs=EPOCHS,
-        
         device=DEVICE
     )
 
@@ -118,11 +117,11 @@ def test_ppo(model_path="ppo_model.pth", xml_path="half_cheetah.xml", episodes=5
 # -------------------------------
 if __name__ == "__main__":
     # Example usage
-    
+
     model_path = os.path.join("output")
 
     # Train
-    train_ppo(  total_updates=1000, num_steps_per_update=2048, model_save_path=model_path)
+    train_ppo(total_updates=1000, num_steps_per_update=128, model_save_path=model_path)
 
     # Test
     #test_ppo(model_path=model_path, xml_path=xml_path, episodes=5, render=True)
