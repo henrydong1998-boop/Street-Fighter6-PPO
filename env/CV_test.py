@@ -1,35 +1,45 @@
-
 import cv2
 from ultralytics import YOLO
 from wincam import DXCamera
-from env.input_manager import InputManager, filter_input
 from env.util import update_buffer_svd, random_projection
 import torch
 import numpy as np
+import cv2
+import time
 
+def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
+    start_time = time.time()
+    HSV_TOLERANCE = 10
+    HEALTH_BAR_Y = 91
+    MIN_X_ACTOR, MAX_X_ACTOR = (236, 1127)
+    MIN_HSV_ACTOR = (339 - HSV_TOLERANCE, 87 - HSV_TOLERANCE, 49 - HSV_TOLERANCE)
+    MAX_HSV_ACTOR = (341 + HSV_TOLERANCE, 100, 86 + HSV_TOLERANCE)
+    MIN_X_OPPONENT, MAX_X_OPPONENT = (1431, 2317)
+    MIN_HSV_OPPONENT = (207 + HSV_TOLERANCE, 83 - HSV_TOLERANCE, 55 - HSV_TOLERANCE)
+    MAX_HSV_OPPONENT = (224 + HSV_TOLERANCE, 93 + 7, 73 + HSV_TOLERANCE)
 
+    hsv_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2HSV)
+    actor_health_bar = hsv_frame[HEALTH_BAR_Y, MIN_X_ACTOR : MAX_X_ACTOR, : ]
+    opponent_health_bar = hsv_frame[HEALTH_BAR_Y, MIN_X_OPPONENT : MAX_X_OPPONENT, : ]
+    actor_health_mask = cv2.inRange(actor_health_bar, MIN_HSV_ACTOR, MAX_HSV_ACTOR)
+    opponent_health_mask = cv2.inRange(opponent_health_bar, MIN_HSV_OPPONENT, MAX_HSV_OPPONENT)
+    end_time = time.time()
+    print(f"function took {end_time - start_time} seconds")
+    pass
 
-# model = YOLO('./yolo/best.pt')
-window_title = 'Street Fighter 6'
-# print(gw.getAllTitles())
-
-
-# embed_layers = [10]
-# input_manager = InputManager("./mai_combos.json")
-#TODO: implement: rl_model = RLModel()
-
-def CV_test(model,model2,input_manager):
-    with DXCamera(0, 0, 1920, 1080, fps=30) as camera:
+# TODO: initializing camera each time function calls is stupid and ineffecient, initialize outside and pass
+def CV_test(model, model2):
+    with DXCamera(0, 32, 1920, 1080, fps=30) as camera:
         buffer = torch.zeros(0, 256)
-        
+
         frame, _ = camera.get_bgr_frame()
         results = model.predict(frame, imgsz=256, conf=0.5)
         # embed = model(frame, embed=embed_layers)[0]
         # res = results[0]
         # embedding = res.embeddings[0]
-        projectile_bbox = torch.zeros((1,4))
-        opponent_bbox = torch.zeros((1,4))
-        actor_bbox = torch.zeros((1,4))
+        projectile_bbox = torch.zeros((1, 4))
+        opponent_bbox = torch.zeros((1, 4))
+        actor_bbox = torch.zeros((1, 4))
         actor_state = -1
         opponent_state = -1
         projectile_state = -1
@@ -52,13 +62,13 @@ def CV_test(model,model2,input_manager):
                 else:
                     projectile_state = cls
                     projectile_bbox = torch.tensor([x1, x2, y1, y2])
-                    
-                    
+
+
         embed_layers = [10]
         embed = model2.predict(frame, embed=embed_layers)[0]  
-        
+
         # buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=6, out_dim=32)
-        
+
         embed = random_projection(embed=embed, out_dim=64, file="random_projection_256_64.npy")
         # print(embed)
 
@@ -79,8 +89,13 @@ def CV_test(model,model2,input_manager):
 
     # cv2.destroyAllWindows()
     # print(actor_state)
-    CV_return=np.concatenate([np.array(actor_state).flatten(), np.array(opponent_state).flatten(), \
-        np.array(projectile_state).flatten(), np.array(actor_bbox).flatten(),np.array(opponent_bbox).flatten(), \
-        np.array(projectile_bbox).flatten(),embed.cpu().numpy().flatten()])
+    CV_return=np.concatenate([np.array(actor_state).flatten(),
+                              np.array(opponent_state).flatten(),
+                              np.array(projectile_state).flatten(),
+                              np.array(actor_bbox).flatten(),
+                              np.array(opponent_bbox).flatten(),
+                              np.array(projectile_bbox).flatten(),
+                              embed.cpu().numpy().flatten()])
+
     # print(f"cv obs: {CV_return}")
-    return CV_return, actor_state, opponent_state
+    return CV_return, actor_state, opponent_state, actor_bbox, opponent_bbox

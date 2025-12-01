@@ -2,6 +2,7 @@ from enum import Enum
 import json
 import time
 import keyboard
+import torch
 
 def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
     #TODO: finish function
@@ -82,7 +83,12 @@ class InputManager:
         return
 
     # return True for facing right, False for facing left
-    def update_facing(self, actor_bbox: list[float], opponent_bbox: list[float]) -> bool:
+    def update_facing(self, actor_bbox: torch.Tensor, opponent_bbox: torch.Tensor) -> bool:
+        empty_bbox = torch.zeros((1, 4))
+        if (torch.eq(actor_bbox, empty_bbox)) or (torch.eq(opponent_bbox, empty_bbox)):
+            self.facing_right = True
+            return self.facing_right
+
         x1, x2, y1, y2 = actor_bbox
         x3, x4, y3, y4 = opponent_bbox
         self.facing_right = (x1 + x2) < (x3 + x4)
