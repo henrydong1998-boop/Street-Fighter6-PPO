@@ -8,7 +8,6 @@ from env.util import update_buffer_svd, random_projection
 import torch
 import numpy as np
 
-
 class SFEnv:
     """
     import CV module to get game state information for RL training.
@@ -23,7 +22,7 @@ class SFEnv:
 
         # ---- Action & observation spaces ----
         # self.action_space = np.array([e.value for e in self.input_manager.InputClass], dtype=int)
-        self.action_space = torch.tensor([e.value for e in self.input_manager.InputClass], dtype=int)
+        self.action_space = torch.tensor([e.value for e in inpm.InputClass], dtype=int)
 
         self.obs = None
 
@@ -38,8 +37,7 @@ class SFEnv:
         self.opponent_bbox = None
         self.actor_health_history = []
         self.opponent_health_history = []
-        self.reward_history = []
-        self.opn_reward_history = []
+        self.combo_history = []
 
 
     def _get_obs(self):
@@ -80,12 +78,13 @@ class SFEnv:
         action_probs[filter == False] = 0.0
         probs_modified = action_probs.clone()
         probs_normalized = probs_modified / probs_modified.sum()
-        action = torch.multinomial(probs_normalized, num_samples=1)
-        #To Do: change this to a multi processing pipe
-        self.input_manager.update_facing(self.actor_bbox, self.opponent_bbox)
-        self.input_manager.accept_prediction(int(action))
-        # self.input_manager.output_actions()
-        time.sleep(1)  # wait for environment to update
+        action = int(torch.multinomial(probs_normalized, num_samples=1))
+        # TODO: change this to a multi processing pipe
+        right = self.input_manager.update_facing(self.actor_bbox, self.opponent_bbox)
+        print(f"facing {"right" if right else "left"}")
+        self.input_manager.accept_prediction(action)
+        # time.sleep(0.01)
+        self.input_manager.output_actions()
         self.obs = self._get_obs()
 
         # SF6 rewardasakssio
@@ -95,12 +94,26 @@ class SFEnv:
         reward_guard = 0
         reward_miss = 0
         reward_neutral = 0
-        delt_health = self.actor_health_history[-2] - self.actor_health_history[-1] if len(self.actor_health_history) > 1 else 0
-        opn_delt_health = self.opponent_health_history[-2] - self.opponent_health_history[-1] if len(self.opponent_health_history) > 1 else 0
+        reward_combo = 0
+
+        if len(self.combo_history) > 100:
+            self.combo_history = self.combo_history[90 : ]
+
+        if len(self.actor_health_history) > 1:
+            delt_health = self.actor_health_history[-2] - self.actor_health_history[-1]
+        if len(self.opponent_health_history) > 1:
+            opn_delt_health = self.opponent_health_history[-2] - self.opponent_health_history[-1] 
+
         reward_delt_health -= delt_health * 200
         reward_opn_delt_health += opn_delt_health * 200
-        # print(f"delta_health reward: {reward_delt_health}")
-        # print(f"opn_delta_health reward: {reward_opn_delt_health}")
+
+        # award successful combo
+        if self.input_manager.get_action_dict(inpm.InputClass(action + 1))["combo_breaks"][0] != -1:
+            if len(self.combo_history) > 0 \
+               and self.combo_history[-1] == action \
+               and self.opponent_state == 5:
+                reward_combo = 10
+            self.combo_history.append(action)
 
         if self.actor_state == 15: # actor hit
             reward_delt_health -= 12
@@ -115,7 +128,14 @@ class SFEnv:
         if self.actor_state == 17: # actor neutral
             reward_neutral = -8
 
-        reward = reward_delt_health + reward_opn_delt_health + reward_atk + reward_guard + reward_miss + reward_neutral
+        reward = reward_delt_health + \
+                 reward_opn_delt_health + \
+                 reward_atk + \
+                 reward_guard + \
+                 reward_miss + \
+                 reward_neutral + \
+                 reward_combo
+
         print(f"Reward:{reward}")
         done = False  # HalfCheetah never terminates early
 

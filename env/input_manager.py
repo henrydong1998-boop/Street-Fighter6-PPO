@@ -4,9 +4,7 @@ import time
 import keyboard
 import torch
 
-def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
-    #TODO: finish function
-    return [True for i in range(16)]
+
 
 InputKeys = {
     "LPunch":      "U",
@@ -23,6 +21,39 @@ InputKeys = {
     "Up":          " "
 }
 
+class InputClass(Enum):
+    combo1 =        1
+    combo2 =        2
+    combo3 =        3
+    combo4 =        4
+    combo5 =        5
+    combo6 =        6
+    combo7 =        7
+    super1 =        8
+    super2 =        9
+    super3 =        10
+    guard =         11
+    guard_lower =   12
+    drive_impact =  13
+    move_forward =  14
+    move_backward = 15
+    throw =         16
+
+def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
+
+
+    action_filter = [True for i in range(16)]
+    # tag_matches = {}
+    # player_tag = tag_matches[actions_tag_player]
+    # opponent_tag = tag_matches[actions_tag_opponent]
+    # if player_tag in ["player_guard", "player_guard_down"]:
+    #     action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
+    # if player_tag in ["hit"]:
+    #     action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
+
+    #TODO: finish function
+    return action_filter
+
 class InputManager:
     NUM_CLASSES = 16
     input_list: list["InputClass"] = []
@@ -32,26 +63,9 @@ class InputManager:
     frame_time = None
     facing_right = True
 
-    class InputClass(Enum):
-        combo1 =        1
-        combo2 =        2
-        combo3 =        3
-        combo4 =        4
-        combo5 =        5
-        combo6 =        6
-        combo7 =        7
-        super1 =        8
-        super2 =        9
-        super3 =        10
-        guard =         11
-        guard_lower =   12
-        drive_impact =  13
-        move_forward =  14
-        move_backward = 15
-        throw =         16
 
     def __init__(self, config_file_path: str, frame_time_seconds: float = 1 / 60):
-        assert len(self.InputClass) == self.NUM_CLASSES
+        assert len(InputClass) == self.NUM_CLASSES
         self.config_read(config_file_path)
         self.frame_time = frame_time_seconds
 
@@ -78,7 +92,7 @@ class InputManager:
 
     def accept_prediction(self, prediction: int) -> None:
         assert prediction >= 0 and prediction <= self.NUM_CLASSES
-        prediction_class = self.InputClass(prediction + 1)
+        prediction_class = InputClass(prediction + 1)
         self.input_list.append(prediction_class)
         return
 
@@ -91,7 +105,7 @@ class InputManager:
 
         x1, x2, y1, y2 = actor_bbox
         x3, x4, y3, y4 = opponent_bbox
-        self.facing_right = (x1 + x2) < (x3 + x4)
+        self.facing_right = (x1 + x2) > (x3 + x4) # wierd how it ended up being this
         return self.facing_right
 
     def output_actions(self) -> None:
@@ -105,6 +119,7 @@ class InputManager:
            (not self.is_combo_action(self.curr_combo_action)) or \
            (last_action != self.curr_combo_action) or \
            (curr_action_dict["combo_breaks"][0] == -1):
+            self.release_all_keys()
             # print("first action of combo")
             self.curr_combo_action = last_action
             self.curr_combo_index = 0
@@ -114,7 +129,6 @@ class InputManager:
             actions = curr_action_dict["actions"][0: actions_until]
             wait_times = curr_action_dict["wait_frames"][0: actions_until]
             self.act_and_wait(actions, wait_times)
-            self.release_all_keys()
             self.input_list = []
             return
 
@@ -162,7 +176,8 @@ class InputManager:
                     action_key = action_key[: -1]
 
                 if action_key == "Front" or action_key == "Back":
-                    input_key = InputKeys["Left"] if (action_key == "Front") != (self.facing_right) else InputKeys["Right"]
+                    is_towards_left = (action_key == "Front") != (self.facing_right)
+                    input_key = InputKeys["Left"] if is_towards_left else InputKeys["Right"]
                 else:
                     input_key = InputKeys[action_key]
 
