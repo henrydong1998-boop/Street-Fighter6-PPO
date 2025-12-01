@@ -33,11 +33,13 @@ class PPOModel(torch.nn.Module):
         # )
 
         self.actor = nn.Sequential(
-        nn.Linear(self.input_dim, 256),
+        nn.Linear(self.input_dim, 512),
         nn.ReLU(),
-        nn.Linear(256, 512),
+        nn.Linear(512, 1024),
         nn.ReLU(),
-        nn.Linear(512, 512),
+        nn.Linear(1024, 1024),
+        nn.ReLU(),
+        nn.Linear(1024, 512),
         nn.ReLU(),
         nn.Linear(512, 256),
         nn.ReLU(),
@@ -47,11 +49,13 @@ class PPOModel(torch.nn.Module):
         )
 
         self.critic = nn.Sequential(
-        nn.Linear(self.input_dim, 256),
+        nn.Linear(self.input_dim, 512),
         nn.ReLU(),
-        nn.Linear(256, 512),
+        nn.Linear(512, 1024),
         nn.ReLU(),
-        nn.Linear(512, 512),
+        nn.Linear(1024, 1024),
+        nn.ReLU(),
+        nn.Linear(1024, 512),
         nn.ReLU(),
         nn.Linear(512, 256),
         nn.ReLU(),
