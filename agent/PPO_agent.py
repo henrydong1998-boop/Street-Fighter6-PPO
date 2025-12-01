@@ -17,8 +17,8 @@ class PPOModel(torch.nn.Module):
         self.n_actions = n_actions
         self.input_dim = obs_dim
         self.is_discrete = is_discrete
-        self._hidden_size1 = 128
-        self._hidden_size2 = 64
+        # self._hidden_size1 = 128
+        # self._hidden_size2 = 64
         #agent_config = self.load_agent_file(config_file)
         #self._load_params(self, agent_config)
 
@@ -33,19 +33,31 @@ class PPOModel(torch.nn.Module):
         # )
 
         self.actor = nn.Sequential(
-        nn.Linear(self.input_dim, self._hidden_size1),
+        nn.Linear(self.input_dim, 256),
         nn.ReLU(),
-        nn.Linear(self._hidden_size1, self._hidden_size2),
+        nn.Linear(256, 512),
         nn.ReLU(),
-        nn.Linear(self._hidden_size2, self.n_actions)
+        nn.Linear(512, 512),
+        nn.ReLU(),
+        nn.Linear(512, 256),
+        nn.ReLU(),
+        nn.Linear(256, 64),
+        nn.ReLU(),
+        nn.Linear(64, self.n_actions)
         )
 
         self.critic = nn.Sequential(
-        nn.Linear(self.input_dim, self._hidden_size1),
+        nn.Linear(self.input_dim, 256),
         nn.ReLU(),
-        nn.Linear(self._hidden_size1, self._hidden_size2),
+        nn.Linear(256, 512),
         nn.ReLU(),
-        nn.Linear(self._hidden_size2, 1)
+        nn.Linear(512, 512),
+        nn.ReLU(),
+        nn.Linear(512, 256),
+        nn.ReLU(),
+        nn.Linear(256, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1)
         )
 
         # Log std for continuous actions
