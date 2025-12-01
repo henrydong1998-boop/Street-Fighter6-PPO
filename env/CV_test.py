@@ -99,7 +99,7 @@ def CV_test(camera, model, model2):
 
     # buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=6, out_dim=32)
 
-    embed = random_projection(embed=embed, out_dim=64, file="random_projection_256_64.npy")
+    embed = random_projection(embed=embed, out_dim=128, file="random_projection_256_64.npy")
     # print(embed)
 
     # TODO: implement pseudocode

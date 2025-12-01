@@ -267,6 +267,7 @@ class PPOAgent:
         Main training loop
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        os.mkdir("./output", exist_ok=True)
         log_file = os.path.join("./output", f"trajectory_log_{timestamp}.txt")
         model_file = os.path.join("output", f"ppo_model_{timestamp}.pth")
         for update in range(total_updates):
