@@ -40,10 +40,9 @@ class InputClass(Enum):
     throw =         16
 
 def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
-
-
+    #TODO: finish function
     action_filter = [True for i in range(16)]
-    # tag_matches = {}
+    tag_matches = {}
     # player_tag = tag_matches[actions_tag_player]
     # opponent_tag = tag_matches[actions_tag_opponent]
     # if player_tag in ["player_guard", "player_guard_down"]:
@@ -51,7 +50,6 @@ def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
     # if player_tag in ["hit"]:
     #     action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
 
-    #TODO: finish function
     return action_filter
 
 class InputManager:

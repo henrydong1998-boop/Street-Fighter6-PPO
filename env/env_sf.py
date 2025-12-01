@@ -5,6 +5,8 @@ import env.input_manager as inpm
 from wincam import DXCamera
 from ultralytics import YOLO
 from env.util import update_buffer_svd, random_projection
+from collections import deque
+from itertools import islice
 import torch
 import numpy as np
 
@@ -35,9 +37,10 @@ class SFEnv:
         self.opponent_state = None
         self.actor_bbox = None
         self.opponent_bbox = None
-        self.actor_health_history = []
-        self.opponent_health_history = []
-        self.combo_history = []
+        self.actor_health_history = deque(maxlen=6)
+        self.opponent_health_history = deque(maxlen=6)
+        self.combo_history = deque(maxlen=10)
+        self.neutral_history = deque(maxlen=30)
 
 
     def _get_obs(self):
@@ -48,10 +51,6 @@ class SFEnv:
         self.opponent_bbox = opponent_bbox
         self.actor_health_history.append(actor_health)
         self.opponent_health_history.append(opponent_health)
-        if len(self.actor_health_history) > 100:
-            self.actor_health_history = self.actor_health_history[90: ]
-        if len(self.opponent_health_history) > 100:
-            self.opponent_health_history = self.opponent_health_history[90: ]
         return obs
 
 
@@ -63,10 +62,6 @@ class SFEnv:
         self.opponent_bbox = opponent_bbox
         self.actor_health_history.append(actor_health)
         self.opponent_health_history.append(opponent_health)
-        if len(self.actor_health_history) > 100:
-            self.actor_health_history = self.actor_health_history[90: ]
-        if len(self.opponent_health_history) > 100:
-            self.opponent_health_history = self.opponent_health_history[90: ]
         self.itr = 0
         return obs
 
@@ -79,11 +74,9 @@ class SFEnv:
         probs_modified = action_probs.clone()
         probs_normalized = probs_modified / probs_modified.sum()
         action = int(torch.multinomial(probs_normalized, num_samples=1))
-        # TODO: change this to a multi processing pipe
-        right = self.input_manager.update_facing(self.actor_bbox, self.opponent_bbox)
-        print(f"facing {"right" if right else "left"}")
+
+        self.input_manager.update_facing(self.actor_bbox, self.opponent_bbox)
         self.input_manager.accept_prediction(action)
-        # time.sleep(0.01)
         self.input_manager.output_actions()
         self.obs = self._get_obs()
 
@@ -96,37 +89,49 @@ class SFEnv:
         reward_neutral = 0
         reward_combo = 0
 
-        if len(self.combo_history) > 100:
-            self.combo_history = self.combo_history[90 : ]
+        if self.actor_health_history[-1] == 0 or self.opponent_health_history[-1] == 0:
+            self.actor_health_history = deque(maxlen=6)
+            self.opponent_health_history = deque(maxlen=6)
 
-        if len(self.actor_health_history) > 1:
+        if len(self.actor_health_history) > 1 and len(self.actor_health_history) < 6:
             delt_health = self.actor_health_history[-2] - self.actor_health_history[-1]
-        if len(self.opponent_health_history) > 1:
-            opn_delt_health = self.opponent_health_history[-2] - self.opponent_health_history[-1] 
+        elif len(self.actor_health_history) == 6:
+            delt_health = sum(islice(self.actor_health_history, 3)) - \
+                          sum(islice(self.actor_health_history, 3, 6))
 
-        reward_delt_health -= delt_health * 200
-        reward_opn_delt_health += opn_delt_health * 200
+        if len(self.opponent_health_history) > 1 and len(self.opponent_health_history) < 6:
+            opn_delt_health = self.opponent_health_history[-2] - self.opponent_health_history[-1]
+        elif len(self.opponent_health_history) == 6:
+            opn_delt_health = sum(islice(self.opponent_health_history, 3)) - \
+                              sum(islice(self.opponent_health_history, 3, 6))
+
+        reward_delt_health -= max(0, delt_health) * 200
+        reward_opn_delt_health += max(0, opn_delt_health) * 200
 
         # award successful combo
         if self.input_manager.get_action_dict(inpm.InputClass(action + 1))["combo_breaks"][0] != -1:
             if len(self.combo_history) > 0 \
-               and self.combo_history[-1] == action \
-               and self.opponent_state == 5:
-                reward_combo = 10
+               and self.combo_history[-1] == action:
+                reward_combo = 20 if self.opponent_state == 5 else -10
             self.combo_history.append(action)
 
         if self.actor_state == 15: # actor hit
             reward_delt_health -= 12
         if self.opponent_state == 5: # opponent hit
-            reward_opn_delt_health += 16
-        if self.actor_state in range(10, 13): # actor combos
-            reward_atk = 10
+            reward_opn_delt_health += 12
+        if self.actor_state in range(10, 13):
+            reward_atk = 5
         if self.actor_state == 13 or self.actor_state == 14: # actor guard
-            reward_guard = 1
+            reward_guard = 20
         if self.opponent_state!=5 and self.actor_state >=10 and self.actor_state<15: # actor miss
-            reward_miss = -2
+            reward_miss = -10
+
         if self.actor_state == 17: # actor neutral
-            reward_neutral = -8
+            self.neutral_history.append(1)
+        else:
+            self.neutral_history.append(0)
+        if sum(self.neutral_history) > max(10, len(self.neutral_history) * 0.67):
+            self.reward_neutral = -20
 
         reward = reward_delt_health + \
                  reward_opn_delt_health + \
