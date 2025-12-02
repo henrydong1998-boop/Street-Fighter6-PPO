@@ -119,6 +119,7 @@ def CV_test(camera, model, model2):
 
     # cv2.destroyAllWindows()
     # print(actor_state)
+    # print(len(embed))
     CV_return=np.concatenate([np.array([actor_health, opponent_health]).flatten(),
                               np.array(actor_state).flatten(),
                               np.array(opponent_state).flatten(),

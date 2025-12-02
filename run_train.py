@@ -17,10 +17,10 @@ IS_DISCRETE = True            # HalfCheetah is continuous
 DEVICE = "cpu"
 
 # Training hyperparameters
-NUM_STEPS_PER_UPDATE = 64
+NUM_STEPS_PER_UPDATE = 256
 TOTAL_UPDATES = 1000000
-ACTOR_LR = 3e-4
-CRITIC_LR = 1e-4
+ACTOR_LR = 1e-4
+CRITIC_LR = 5e-5
 GAMMA = 0.99
 CLIP_EPS = 0.3
 BATCH_SIZE = 512
