@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # Example usage
 
     model_path = os.path.join("output")
-    old_model_name="ppo_model_20251201_142342.pth"
+    old_model_name="ppo_model_20251202_201100.pth"
 
     # Train
     train_ppo(total_updates=1000000,

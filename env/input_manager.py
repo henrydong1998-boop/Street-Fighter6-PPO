@@ -3,6 +3,7 @@ import json
 import time
 import keyboard
 import torch
+import numpy as np
 
 
 InputKeys = {
@@ -67,14 +68,17 @@ class InputClass(Enum):
 
 def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
     #TODO: finish function
-    action_filter = [True for i in range(16)]
+    action_filter = np.array([True for i in range(16)])
+    if actions_tag_player < 0 or actions_tag_opponent <0 :
+        return action_filter
     player_tag = CVClassNames[actions_tag_player]
     opponent_tag = CVClassNames[actions_tag_opponent]
 
     # inputclass begins at 1, whereas input indices begin at 0
-
+    # print(InputClass.combo1.value - 1, InputClass.super3.value)
     if player_tag in ["player_guard", "player_guard_down"]:
         action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
+        # numpy good, list bad
     elif player_tag == "player_hit":
         action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
         action_filter[InputClass.combo4.value - 1] = True
