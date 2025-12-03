@@ -90,8 +90,10 @@ class InputManager:
 
     def accept_prediction(self, prediction: int) -> None:
         assert prediction >= 0 and prediction <= self.NUM_CLASSES
+        # print(prediction)
         prediction_class = InputClass(prediction + 1)
         self.input_list.append(prediction_class)
+        # print(prediction_class)
         return
 
     # return True for facing right, False for facing left

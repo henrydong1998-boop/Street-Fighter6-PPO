@@ -80,6 +80,8 @@ class SFEnv:
         self.input_manager.output_actions()
         self.obs = self._get_obs()
 
+        # print(action)
+
         # SF6 rewardasakssio
         reward_delt_health = 0
         reward_opn_delt_health = 0
@@ -90,6 +92,7 @@ class SFEnv:
         reward_combo = 0
         delt_health = 0
         opn_delt_health = 0
+        reward_against_throw = 0
 
         if len(self.actor_health_history) > 1 and len(self.actor_health_history) < 6:
             delt_health = self.actor_health_history[-2] - self.actor_health_history[-1]
@@ -103,8 +106,9 @@ class SFEnv:
             opn_delt_health = sum(islice(self.opponent_health_history, 3)) - \
                               sum(islice(self.opponent_health_history, 3, 6))
 
-        reward_delt_health -= max(0, delt_health) * 200
-        reward_opn_delt_health += max(0, opn_delt_health) * 120
+        # reward_delt_health -= max(0, delt_health) * 100
+        # reward_opn_delt_health += max(0, opn_delt_health) * 100
+        # print(delt_health)
 
         # award successful combo
         if self.input_manager.get_action_dict(inpm.InputClass(action + 1))["combo_breaks"][0] != -1:
@@ -113,23 +117,26 @@ class SFEnv:
                 reward_combo = 20 if self.opponent_state == 5 else -10
             self.combo_history.append(action)
 
+
         if self.actor_state == 15: # actor hit
-            reward_delt_health -= 12
+            reward_delt_health -= 12 * max(0, delt_health) * 10
         if self.opponent_state == 5: # opponent hit
-            reward_opn_delt_health += 12
+            reward_opn_delt_health += 12 * max(0, opn_delt_health) * 10
         if self.actor_state in range(10, 13):
             reward_atk = 5
         if self.actor_state == 13 or self.actor_state == 14: # actor guard
-            reward_guard = 50
+            reward_guard = 10
         if self.opponent_state!=5 and self.actor_state >=10 and self.actor_state<15: # actor miss
             reward_miss = -10
+        if self.opponent_state == 9 and action + 1 ==16:
+            reward_against_throw = 20
 
         if self.actor_state == 17: # actor neutral
             self.neutral_history.append(1)
         else:
             self.neutral_history.append(0)
         if sum(self.neutral_history) > max(10, len(self.neutral_history) * 0.67):
-            self.reward_neutral = -20
+            self.reward_neutral = -15
 
         reward = reward_delt_health + \
                  reward_opn_delt_health + \
@@ -137,7 +144,7 @@ class SFEnv:
                  reward_guard + \
                  reward_miss + \
                  reward_neutral + \
-                 reward_combo
+                 reward_combo + reward_against_throw
 
         if self.actor_health_history[-1] == 0 or self.opponent_health_history[-1] == 0:
             self.actor_health_history = deque(maxlen=6)

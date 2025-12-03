@@ -31,10 +31,13 @@ ENTROPY_COEF = 0.02
 # -------------------------------
 # Training function
 # -------------------------------
-def train_ppo(total_updates, num_steps_per_update, model_save_path):
+def train_ppo(total_updates, num_steps_per_update, model_save_path,Start_From_Old,MD_name):
     env = SFEnv()
     #print(env.action_space)
     model = PPOModel(env.obs_dim, len(env.action_space), IS_DISCRETE)
+    if Start_From_Old==True:
+        model.load_state_dict(torch.load(os.path.join(model_save_path, MD_name), map_location=DEVICE))
+        model.to(DEVICE)
     agent = PPOAgent(
         env,
         model,
@@ -119,9 +122,10 @@ if __name__ == "__main__":
     # Example usage
 
     model_path = os.path.join("output")
+    old_model_name="ppo_model_20251202_164947.pth"
 
     # Train
-    train_ppo(total_updates=1000, num_steps_per_update=128, model_save_path=model_path)
+    train_ppo(total_updates=1000, num_steps_per_update=128, model_save_path=model_path,Start_From_Old=True,MD_name=old_model_name)
 
     # Test
     #test_ppo(model_path=model_path, xml_path=xml_path, episodes=5, render=True)
