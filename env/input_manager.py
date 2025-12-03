@@ -5,7 +5,6 @@ import keyboard
 import torch
 
 
-
 InputKeys = {
     "LPunch":      "U",
     "MPunch":      "I",
@@ -20,6 +19,33 @@ InputKeys = {
     "Right":       "D",
     "Up":          " "
 }
+
+CVClassNames = {
+    0: "opponent_attack",
+    1: "opponent_attack_lower",
+    2: "opponent_drive",
+    3: "opponent_guard",
+    4: "opponent_guard_lower",
+    5: "opponent_hit",
+    6: "opponent_jump",
+    7: "opponent_neutral",
+    8: "opponent_super",
+    9: "opponent_throw",
+    10: "player_attack",
+    11: "player_attack_lower",
+    12: "player_drive",
+    13: "player_guard",
+    14: "player_guard_lower",
+    15: "player_hit",
+    16: "player_jump",
+    17: "player_neutral",
+    18: "player_super",
+    19: "player_throw",
+    20: "projectile_opponent",
+    21: "projectile_player"
+}
+
+CVClassToTags = {value: key for key, value in CVClassNames.items()}
 
 class InputClass(Enum):
     combo1 =        1
@@ -42,13 +68,30 @@ class InputClass(Enum):
 def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
     #TODO: finish function
     action_filter = [True for i in range(16)]
-    tag_matches = {}
-    # player_tag = tag_matches[actions_tag_player]
-    # opponent_tag = tag_matches[actions_tag_opponent]
-    # if player_tag in ["player_guard", "player_guard_down"]:
-    #     action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
-    # if player_tag in ["hit"]:
-    #     action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
+    player_tag = CVClassNames[actions_tag_player]
+    opponent_tag = CVClassNames[actions_tag_opponent]
+
+    # inputclass begins at 1, whereas input indices begin at 0
+
+    if player_tag in ["player_guard", "player_guard_down"]:
+        action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
+    elif player_tag == "player_hit":
+        action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
+        action_filter[InputClass.combo4.value - 1] = True
+        action_filter[InputClass.drive_impact.value - 1] = True
+        action_filter[InputClass.move_forward.value - 1] = True
+
+    if opponent_tag == "opponent_throw":
+        action_filter = [False for i in range(16)]
+        action_filter[InputClass.throw.value - 1] = True
+        action_filter[InputClass.drive_impact.value - 1] = True
+        action_filter[InputClass.guard.value - 1] = True
+        action_filter[InputClass.guard_lower.value - 1] = True
+    elif opponent_tag == "opponent_guard":
+        action_filter[InputClass.guard.value - 1] = False
+        action_filter[InputClass.move_forward.value - 1] = False
+    elif opponent_tag == "opponent_attack_lower":
+        action_filter[InputClass.guard.value - 1] = False
 
     return action_filter
 
@@ -165,7 +208,6 @@ class InputManager:
             action = actions[index]
             wait_frame = wait_frames[index]
             action_keys = action.split("_")
-            # print(f"action_keys: {action_keys}")
             to_release = []
 
             for action_key in action_keys:
@@ -182,15 +224,12 @@ class InputManager:
                     input_key = InputKeys[action_key]
 
                 if hold and not keyboard.is_pressed(input_key):
-                    # print(f"pressed {input_key}")
                     keyboard.press(input_key)
                 if release:
-                    # print(f"released {input_key}")
                     keyboard.release(input_key)
                 if (not hold) and (not release):
                     keyboard.press(input_key)
                     to_release.append(input_key)
-                    # print(f"pressed and released {input_key}")
 
             if len(to_release)!= 0:
                 time.sleep(self.frame_time)
@@ -198,26 +237,5 @@ class InputManager:
                     keyboard.release(key)
 
             if wait_frame != 0:
-                # print(f"slept for {wait_frame * self.frame_time} seconds")
-                # print(f"wait frames is {wait_frame}")
-                # print(f"frame time is {self.frame_time}")
                 time.sleep(wait_frame * self.frame_time)
         return
-
-if __name__ == "__main__":
-    time.sleep(5)
-    input_manager = InputManager("mai_combos.json")
-    input_manager.accept_prediction(9)
-    input_manager.output_actions()
-    # input_manager.accept_prediction(2)
-    # input_manager.output_actions()
-    # input_manager.accept_prediction(2)
-    # input_manager.output_actions()
-    # input_manager.accept_prediction(2)
-    # input_manager.output_actions()
-    # input_manager.accept_prediction(4)
-    # input_manager.output_actions()
-    # input_manager.accept_prediction(4)
-    # input_manager.output_actions()
-    # input_manager.accept_prediction(4)
-    # input_manager.output_actions()

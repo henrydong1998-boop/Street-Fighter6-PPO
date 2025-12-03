@@ -31,12 +31,15 @@ ENTROPY_COEF = 0.02
 # -------------------------------
 # Training function
 # -------------------------------
-def train_ppo(total_updates, num_steps_per_update, model_save_path,Start_From_Old,MD_name):
+def train_ppo(model_save_path,
+              model_name = None,
+              total_updates=TOTAL_UPDATES,
+              num_steps_per_update=NUM_STEPS_PER_UPDATE):
     env = SFEnv()
     #print(env.action_space)
     model = PPOModel(env.obs_dim, len(env.action_space), IS_DISCRETE)
-    if Start_From_Old==True:
-        model.load_state_dict(torch.load(os.path.join(model_save_path, MD_name), map_location=DEVICE))
+    if model_name is not None:
+        model.load_state_dict(torch.load(os.path.join(model_save_path, model_name), map_location=DEVICE))
         model.to(DEVICE)
     agent = PPOAgent(
         env,
@@ -53,7 +56,7 @@ def train_ppo(total_updates, num_steps_per_update, model_save_path,Start_From_Ol
     )
 
     print("Starting PPO training...")
-    agent.train(num_steps_per_update=NUM_STEPS_PER_UPDATE, total_updates=TOTAL_UPDATES)
+    agent.train(num_steps_per_update=num_steps_per_update, total_updates=total_updates)
     print(f"Environment initialized with observation dim {env.obs_dim} and action dim {env.model.nu}")
     print("Training completed.")
 
@@ -122,10 +125,14 @@ if __name__ == "__main__":
     # Example usage
 
     model_path = os.path.join("output")
-    old_model_name="ppo_model_20251202_164947.pth"
+    old_model_name="ppo_model_20251201_142342.pth"
 
     # Train
-    train_ppo(total_updates=1000, num_steps_per_update=128, model_save_path=model_path,Start_From_Old=True,MD_name=old_model_name)
+    train_ppo(total_updates=1000000,
+            #   model_name=old_model_name
+              num_steps_per_update=256,
+              model_save_path=model_path
+              )
 
     # Test
     #test_ppo(model_path=model_path, xml_path=xml_path, episodes=5, render=True)

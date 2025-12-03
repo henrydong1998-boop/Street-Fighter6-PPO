@@ -44,7 +44,6 @@ def train_ppo(xml_path, total_updates, num_steps_per_update, model_save_path):
         entropy_coef=ENTROPY_COEF,
         batch_size=BATCH_SIZE,
         epochs=EPOCHS,
-        
         device=DEVICE
     )
 

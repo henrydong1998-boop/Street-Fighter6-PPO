@@ -80,7 +80,6 @@ class SFEnv:
         self.input_manager.output_actions()
         self.obs = self._get_obs()
 
-        # print(action)
 
         # SF6 rewardasakssio
         reward_delt_health = 0
@@ -117,26 +116,43 @@ class SFEnv:
                 reward_combo = 20 if self.opponent_state == 5 else -10
             self.combo_history.append(action)
 
+        actor_tag = inpm.CVClassNames[self.actor_state]
+        opponent_tag = inpm.CVClassNames[self.opponent_state]
 
-        if self.actor_state == 15: # actor hit
+        tag_dict = inpm.CVClassToTags
+        player_hit_tag = tag_dict["player_hit"]
+        player_neutral_tag = tag_dict["player_neutral"]
+        player_attack_tags = (tag_dict["player_attack"],
+                              tag_dict["player_attack_lower"],
+                              tag_dict["player_drive"],
+                              tag_dict["player_super"],
+                              tag_dict["player_throw"])
+        player_guard_tags = (tag_dict["player_guard"], tag_dict["player_guard_lower"])
+
+        opponent_hit_tag = tag_dict["opponent_hit"]
+        opponent_throw_tag = tag_dict["opponent_throw"]
+
+        if actor_tag == player_hit_tag: # actor hit
             reward_delt_health -= 12 * max(0, delt_health) * 10
-        if self.opponent_state == 5: # opponent hit
-            reward_opn_delt_health += 12 * max(0, opn_delt_health) * 10
-        if self.actor_state in range(10, 13):
+        elif actor_tag in player_attack_tags:
             reward_atk = 5
-        if self.actor_state == 13 or self.actor_state == 14: # actor guard
+        elif actor_tag in player_guard_tags:
             reward_guard = 10
-        if self.opponent_state!=5 and self.actor_state >=10 and self.actor_state<15: # actor miss
-            reward_miss = -10
-        if self.opponent_state == 9 and action + 1 ==16:
-            reward_against_throw = 20
 
-        if self.actor_state == 17: # actor neutral
+        if actor_tag == player_neutral_tag:
             self.neutral_history.append(1)
         else:
             self.neutral_history.append(0)
         if sum(self.neutral_history) > max(10, len(self.neutral_history) * 0.67):
             self.reward_neutral = -15
+
+        if opponent_tag == opponent_hit_tag:
+            reward_opn_delt_health += 12 * max(0, opn_delt_health) * 10
+        elif actor_tag in player_attack_tags:
+            if opponent_tag != opponent_throw_tag or inpm.InputClass(action + 1).name != "throw": # actor miss
+                reward_miss = -10
+            else: # actor throw escape
+                reward_against_throw = 20
 
         reward = reward_delt_health + \
                  reward_opn_delt_health + \

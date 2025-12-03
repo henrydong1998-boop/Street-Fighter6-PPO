@@ -8,8 +8,6 @@ from torch.distributions import Normal, Categorical
 from datetime import datetime
 
 
-
-
 class PPOModel(torch.nn.Module):
     def __init__(self, obs_dim, n_actions,is_discrete):
         super().__init__()
@@ -67,11 +65,9 @@ class PPOModel(torch.nn.Module):
         # Log std for continuous actions
         if not self.is_discrete:
             self.log_std = nn.Parameter(torch.zeros(self.n_actions))
-    
 
     def forward(self, obs: torch.Tensor):
         # h = self.fc(x)
-        
         value = self.critic(obs).squeeze(-1)
         if self.is_discrete:
             logits = self.actor(obs)
@@ -82,10 +78,6 @@ class PPOModel(torch.nn.Module):
             dist = Normal(mu, std)
 
         return dist, value
-    
-
-
-
 
 class PPOAgent:
     NAME = "PPO"
@@ -108,11 +100,8 @@ class PPOAgent:
         self._epochs = epochs
         self._iter = 0
         self._sample_count = 0
-
-        
-
         return
-    
+
     def get_action(self, obs: torch.Tensor):
         """
         Sample an action for environment interaction
@@ -141,7 +130,7 @@ class PPOAgent:
             log_prob = log_prob.sum(axis=-1)
             entropy = entropy.sum(axis=-1)
         return log_prob, entropy, value
-    
+
     def compute_returns(self, rewards, dones, last_value):
         """
         Compute discounted returns
@@ -152,7 +141,7 @@ class PPOAgent:
             R = r + self._gamma * R * (1 - done)
             returns.insert(0, R)
         return torch.tensor(returns, dtype=torch.float32, device=self._device)
-    
+
     def collect_trajectories(self, num_steps):
         """
         Collect rollout trajectories from the environment
@@ -165,7 +154,7 @@ class PPOAgent:
                 action, log_prob, value, dist = self.get_action(obs)
 
             next_obs, reward, done, _ = self._env.step(dist)
-            
+
             obs_list.append(torch.tensor(obs, dtype=torch.float32).unsqueeze(0))
             #action_list.append(torch.tensor(action, dtype=torch.float32).unsqueeze(0))
             action_list.append(torch.tensor(action, dtype=torch.float32))
@@ -178,7 +167,7 @@ class PPOAgent:
             #do not break on done to collect fixed length trajectories
             if done:
                 obs = self._env.reset()
-        
+
         obs_tensor = torch.cat(obs_list).to(self._device)
         actions_tensor = torch.cat(action_list).to(self._device)
         log_probs_tensor = torch.cat(log_prob_list).to(self._device)
@@ -204,7 +193,7 @@ class PPOAgent:
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
         return obs_tensor, actions_tensor, log_probs_tensor, returns, advantages
-    
+
     def ppo_update(self, obs, actions, log_probs_old, returns, advantages):
         """
         Update PPO policy using mini-batches

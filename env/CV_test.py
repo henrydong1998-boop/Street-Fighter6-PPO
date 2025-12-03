@@ -41,10 +41,6 @@ def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
     actor_healthbar_len = actor_health_bar.shape[1]
     opponent_healthbar_len = opponent_health_bar.shape[1]
 
-    # actor_health_normal = np.count_nonzero(cv2.inRange(actor_health_bar, MIN_HSV_ACTOR, MAX_HSV_ACTOR))
-    # opponent_health_normal = np.count_nonzero(cv2.inRange(opponent_health_bar, MIN_HSV_OPPONENT, MAX_HSV_OPPONENT))
-    # actor_health_critical = np.count_nonzero(cv2.inRange(actor_health_bar, MIN_HSV_CRITICAL, MAX_HSV_CRITICAL))
-    # opponent_health_critical = np.count_nonzero(cv2.inRange(opponent_health_bar, MIN_HSV_CRITICAL, MAX_HSV_CRITICAL))
     actor_health_normal_idx = np.flatnonzero(cv2.inRange(actor_health_bar, MIN_HSV_ACTOR, MAX_HSV_ACTOR))
     actor_health_normal = actor_health_normal_idx[-1] if actor_health_normal_idx.shape[0] > 0 else 0
     opponent_health_normal_idx = np.flatnonzero(cv2.inRange(opponent_health_bar, MIN_HSV_OPPONENT, MAX_HSV_OPPONENT))
@@ -102,24 +98,6 @@ def CV_test(camera, model, model2):
     # embed = random_projection(embed=embed, out_dim=128, file="random_projection_256_64.npy")
     # print(embed)
 
-    # TODO: implement pseudocode
-    # 
-    # 可以获得的变量有 actor_state, opponent_state, projectile_state, actor_bbox, opponent_bbox, projectile_bbox,embed
-    # *_bbox 是2维数组，Nx4，表示检测到的该类别物体的边界框,绝大多数情况下N=1，可以拿到对手和自己的bbox 一共 8个值
-    # *_state 是整数，表示检测到的该类别物体的状态
-    # embed 是embedding向量，可以作为RL模型的输入之一 [64维]
-    # 
-    # predictions_unfiltered = rl_model.predict(results)
-    # predictions = filter_input(actor_state, opponent_state) * prediction_unfiltered
-    # prediction = argmax(predictions)
-    # somehow update rl_model with filter_input mask
-    # input_manager.update_facing(actor_bbox, opponent_bbox)
-    # input_manager.accept_prediction(prediction)
-    # input_manager.output_actions()
-
-    # cv2.destroyAllWindows()
-    # print(actor_state)
-    # print(len(embed))
     CV_return=np.concatenate([np.array([actor_health, opponent_health]).flatten(),
                               np.array(actor_state).flatten(),
                               np.array(opponent_state).flatten(),
@@ -129,5 +107,4 @@ def CV_test(camera, model, model2):
                               np.array(projectile_bbox).flatten(),
                               embed.cpu().numpy().flatten()])
 
-    # print(f"cv obs: {CV_return}")
     return CV_return, actor_state, opponent_state, actor_bbox, opponent_bbox, actor_health, opponent_health
