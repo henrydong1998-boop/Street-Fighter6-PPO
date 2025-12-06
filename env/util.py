@@ -15,7 +15,7 @@ def update_buffer_svd(buffer, new_embed, window_size=4, out_dim=64):
         cache = svd.fit_transform(buffer_np)
         cache = torch.from_numpy(cache)
     else:
-        cache = None
+        cache = torch.zeros(4, 32).cuda()
 
     return buffer, cache
 

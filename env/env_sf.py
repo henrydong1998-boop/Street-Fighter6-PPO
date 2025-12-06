@@ -140,7 +140,7 @@ class SFEnv:
             reward_delt_health -= 12 * max(0, delt_health) * 10
         elif self.actor_state in player_attack_tags:
             reward_atk = 5
-        elif self.actor_state in player_guard_tags:
+        elif self.actor_state in player_guard_tags or (self.actor_state == player_hit_tag and delt_health == 0):
             reward_guard = 10
 
         if self.actor_state == player_neutral_tag:
@@ -148,7 +148,7 @@ class SFEnv:
         else:
             self.neutral_history.append(0)
         if sum(self.neutral_history) > max(10, len(self.neutral_history) * 0.67):
-            self.reward_neutral = -15
+            self.reward_neutral = -10
 
         if self.opponent_state == opponent_hit_tag:
             reward_opn_delt_health += 12 * max(0, opn_delt_health) * 10
