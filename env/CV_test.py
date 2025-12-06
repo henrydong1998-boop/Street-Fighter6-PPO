@@ -55,7 +55,7 @@ def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
     return (actor_health, opponent_health)
 
 def CV_test(camera, model, model2):
-    buffer = torch.zeros(0, 256)
+    buffer = torch.zeros(0, 256).cuda()
 
     frame, _ = camera.get_bgr_frame()
     results = model.predict(frame, imgsz=256, conf=0.5)
@@ -93,10 +93,11 @@ def CV_test(camera, model, model2):
     embed_layers = [10]
     embed = model2.predict(frame, embed=embed_layers)[0]  
 
-    # buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=6, out_dim=32)
+    buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=4, out_dim=32)
 
-    # embed = random_projection(embed=embed, out_dim=128, file="random_projection_256_64.npy")
+    embed = random_projection(embed=embed, out_dim=128, file="random_projection_256_64.npy")
     # print(embed)
+    # print(cache32.shape)
 
     CV_return=np.concatenate([np.array([actor_health, opponent_health]).flatten(),
                               np.array(actor_state).flatten(),
@@ -105,6 +106,7 @@ def CV_test(camera, model, model2):
                               np.array(actor_bbox).flatten(),
                               np.array(opponent_bbox).flatten(),
                               np.array(projectile_bbox).flatten(),
+                              cache32.cpu().numpy().flatten(),
                               embed.cpu().numpy().flatten()])
 
     return CV_return, actor_state, opponent_state, actor_bbox, opponent_bbox, actor_health, opponent_health
