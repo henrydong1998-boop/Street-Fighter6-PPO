@@ -34,8 +34,6 @@ ENTROPY_COEF = 0.02
 def test_ppo(model_save_path,model_name = None, episodes=100,  device=None):
     """
     Test a trained PPO model independently.
-
-    
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -77,8 +75,6 @@ def test_ppo(model_save_path,model_name = None, episodes=100,  device=None):
             obs, reward, done, _ = env.step(dist,test=True)
             total_reward += reward
 
-            
-
         print(f"Episode {ep+1} reward: {total_reward}")
 
     env.close()
@@ -89,12 +85,8 @@ def test_ppo(model_save_path,model_name = None, episodes=100,  device=None):
 # -------------------------------
 if __name__ == "__main__":
     # Example usage
-    
     model_save_path = os.path.join("output")
     model_name="ppo_model_20251206_120304.pth"
 
-    # Train
-    #train_ppo(xml_path=xml_path, total_updates=1000, num_steps_per_update=2048, model_save_path=model_path)
-
     # Test
-    test_ppo(model_save_path,model_name ,  episodes=100)
+    test_ppo(model_save_path, model_name, episodes=100)
