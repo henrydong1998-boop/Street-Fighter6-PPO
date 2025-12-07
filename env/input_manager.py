@@ -67,15 +67,12 @@ class InputClass(Enum):
     throw =         16
 
 def filter_input(actions_tag_player, actions_tag_opponent) -> list[bool]:
-    #TODO: finish function
     action_filter = np.array([True for i in range(16)])
     if actions_tag_player < 0 or actions_tag_opponent <0 :
         return action_filter
     player_tag = CVClassNames[actions_tag_player]
     opponent_tag = CVClassNames[actions_tag_opponent]
 
-    # inputclass begins at 1, whereas input indices begin at 0
-    # print(InputClass.combo1.value - 1, InputClass.super3.value)
     if player_tag in ["player_guard", "player_guard_down"]:
         action_filter[InputClass.combo1.value - 1: InputClass.super3.value] = False
         # numpy good, list bad
@@ -137,10 +134,8 @@ class InputManager:
 
     def accept_prediction(self, prediction: int) -> None:
         assert prediction >= 0 and prediction <= self.NUM_CLASSES
-        # print(prediction)
         prediction_class = InputClass(prediction + 1)
         self.input_list.append(prediction_class)
-        # print(prediction_class)
         return
 
     # return True for facing right, False for facing left
@@ -167,7 +162,6 @@ class InputManager:
            (last_action != self.curr_combo_action) or \
            (curr_action_dict["combo_breaks"][0] == -1):
             self.release_all_keys()
-            # print("first action of combo")
             self.curr_combo_action = last_action
             self.curr_combo_index = 0
             actions_until = curr_action_dict["combo_breaks"][self.curr_combo_index]
@@ -180,18 +174,15 @@ class InputManager:
             return
 
         if self.curr_combo_index >= len(curr_action_dict["combo_breaks"]) - 1:
-            # print(f"curr_combo_index was {self.curr_combo_index}, resetting to 0")
             self.curr_combo_index = 0
         else:
             self.curr_combo_index = self.curr_combo_index + 1
-            # print(f"incrementing curr_combo_index to {self.curr_combo_index}")
         actions_from  = 0
         if self.curr_combo_index >= 1:
             actions_from = curr_action_dict["combo_breaks"][self.curr_combo_index - 1]
         actions_until = curr_action_dict["combo_breaks"][self.curr_combo_index]
         if actions_until == -1:
             actions_until = len(curr_action_dict["actions"])
-        # print(f"performing actions from {actions_from} to {actions_until}")
         actions = curr_action_dict["actions"][actions_from: actions_until]
         wait_times = curr_action_dict["wait_frames"][actions_from: actions_until]
         self.act_and_wait(actions, wait_times)
@@ -205,8 +196,6 @@ class InputManager:
         return
 
     def act_and_wait(self, actions: list[str], wait_frames: list[int]) -> None:
-        # print(f"actions: {actions}")
-        # print(f"wait_times: {wait_frames}")
         assert len(actions) == len(wait_frames)
         for index in range(len(actions)):
             action = actions[index]

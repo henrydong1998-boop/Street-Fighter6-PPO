@@ -59,9 +59,6 @@ def CV_test(camera, model, model2):
 
     frame, _ = camera.get_bgr_frame()
     results = model.predict(frame, imgsz=256, conf=0.5)
-    # embed = model(frame, embed=embed_layers)[0]
-    # res = results[0]
-    # embedding = res.embeddings[0]
     projectile_bbox = torch.zeros((1, 4))
     opponent_bbox = torch.zeros((1, 4))
     actor_bbox = torch.zeros((1, 4))
@@ -71,14 +68,12 @@ def CV_test(camera, model, model2):
     actor_health, opponent_health = extract_health_info(bgr_frame=frame)
 
     for res in results:
-        # print(res.boxes)
         for b in res.boxes:
             x1, y1, x2, y2 = b.xyxy[0].int().tolist()
             cls = int(b.cls[0])
             conf = float(b.conf[0])
             frame = np.ascontiguousarray(frame)
             frame = frame.astype(np.uint8, copy=False)
-            # cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
             if cls < 10:
                 opponent_state = cls
                 actor_bbox = torch.tensor([x1, x2, y1, y2])
@@ -96,8 +91,6 @@ def CV_test(camera, model, model2):
     buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=4, out_dim=32)
 
     embed = random_projection(embed=embed, out_dim=128, file="random_projection_256_64.npy")
-    # print(embed)
-    # print(cache32.shape)
 
     CV_return=np.concatenate([np.array([actor_health, opponent_health]).flatten(),
                               np.array(actor_state).flatten(),

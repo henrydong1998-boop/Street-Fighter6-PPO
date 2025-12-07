@@ -20,10 +20,9 @@ class SFEnv:
 
     def __init__(self):
         self.itr = 0
-        self.input_manager = inpm.InputManager("./mai_singles.json")
+        self.input_manager = inpm.InputManager("./mai_combos.json")
 
         # ---- Action & observation spaces ----
-        # self.action_space = np.array([e.value for e in self.input_manager.InputClass], dtype=int)
         self.action_space = torch.tensor([e.value for e in inpm.InputClass], dtype=int)
 
         self.obs = None
@@ -109,24 +108,13 @@ class SFEnv:
             opn_delt_health = sum(islice(self.opponent_health_history, 3)) - \
                               sum(islice(self.opponent_health_history, 3, 6))
 
-        # reward_delt_health -= max(0, delt_health) * 100
-        # reward_opn_delt_health += max(0, opn_delt_health) * 100
-        # print(delt_health)
-
         # award successful combo
         if self.input_manager.get_action_dict(inpm.InputClass(action + 1))["combo_breaks"][0] != -1:
             if len(self.combo_history) > 0 \
                and self.combo_history[-1] == action:
                 reward_combo = 20 if self.opponent_state == 5 else -10
             self.combo_history.append(action)
-        # if self.actor_state == -1 or self.opponent_state == -1:
-        #     actor_tag = None
-        #     opponent_tag = None
-        # else:
-        #     actor_tag = inpm.CVClassNames[self.actor_state]
-        #     opponent_tag = inpm.CVClassNames[self.opponent_state]
-        # print(actor_tag,opponent_tag)
-        # xia ci bu xu luan gai le o
+
         tag_dict = inpm.CVClassToTags
         player_hit_tag = tag_dict["player_hit"]
         player_neutral_tag = tag_dict["player_neutral"]
@@ -136,7 +124,6 @@ class SFEnv:
                               tag_dict["player_super"],
                               tag_dict["player_throw"])
         player_guard_tags = (tag_dict["player_guard"], tag_dict["player_guard_lower"])
-        # print(player_hit_tag)
         opponent_hit_tag = tag_dict["opponent_hit"]
         opponent_throw_tag = tag_dict["opponent_throw"]
 
@@ -176,7 +163,7 @@ class SFEnv:
             reward = 0
 
         print(f"Reward:{reward}, delta_health: {reward_delt_health}, opponent delta_health: {reward_opn_delt_health}, passive: {reward_neutral}, guard: {reward_guard}")
-        done = False  # HalfCheetah never terminates early
+        done = False
 
         info = {"reward": reward}
         self.itr = self.itr + 1

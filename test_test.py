@@ -1,4 +1,4 @@
-from test_health_bar import extract_health_info, CameraHolder
+from extract_health_bar import extract_health_info, CameraHolder
 import time
 import cv2
 

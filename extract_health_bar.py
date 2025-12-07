@@ -1,9 +1,8 @@
-from wincam import DXCamera
+from argparse import ArgumentParser
 import cv2
-import time
 import numpy as np
 
-# assumes bgr_frame of 1920x1080 resolution
+
 def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
     HEALTH_BAR_Y = 67
     MIN_X_ACTOR, MAX_X_ACTOR = (177, 845)
@@ -37,10 +36,6 @@ def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
     actor_healthbar_len = actor_health_bar.shape[1]
     opponent_healthbar_len = opponent_health_bar.shape[1]
 
-    # actor_health_normal = np.count_nonzero(cv2.inRange(actor_health_bar, MIN_HSV_ACTOR, MAX_HSV_ACTOR))
-    # opponent_health_normal = np.count_nonzero(cv2.inRange(opponent_health_bar, MIN_HSV_OPPONENT, MAX_HSV_OPPONENT))
-    # actor_health_critical = np.count_nonzero(cv2.inRange(actor_health_bar, MIN_HSV_CRITICAL, MAX_HSV_CRITICAL))
-    # opponent_health_critical = np.count_nonzero(cv2.inRange(opponent_health_bar, MIN_HSV_CRITICAL, MAX_HSV_CRITICAL))
     actor_health_normal_idx = np.flatnonzero(cv2.inRange(actor_health_bar, MIN_HSV_ACTOR, MAX_HSV_ACTOR))
     actor_health_normal = actor_health_normal_idx[-1] if actor_health_normal_idx.shape[0] > 0 else 0
     opponent_health_normal_idx = np.flatnonzero(cv2.inRange(opponent_health_bar, MIN_HSV_OPPONENT, MAX_HSV_OPPONENT))
@@ -54,10 +49,14 @@ def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
     opponent_health = max(opponent_health_normal, opponent_health_critical) / opponent_healthbar_len
     return (actor_health, opponent_health)
 
-# camera = DXCamera(0, 32, 1920, 1080, fps=30)
-class CameraHolder():
-    def __init__(self):
-        self.camera = DXCamera(0, 32, 1920, 1080, fps=30)
-
-    def get_camera(self):
-        return self.camera
+if __name__ == "__main__":
+    args_parser = ArgumentParser()
+    args_parser.add_argument("-s","--source", dest="source", default=None)
+    args = args_parser.parse_args()
+    source_file = args.source
+    assert(source_file)
+    source_bgr_frame = cv2.imread(source_file)
+    cropped_bgr_frame = source_bgr_frame[32: 1080 + 32, 0: 1920, :]
+    actor_health, opponent_health = extract_health_info(cropped_bgr_frame)
+    health_advantage = actor_health - opponent_health
+    print(f"Actor Health: [{actor_health: .0%}], Opponent Health: [{opponent_health: .0%}], Health Advantage:[{health_advantage: .0%}]")
