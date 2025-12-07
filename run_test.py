@@ -2,7 +2,7 @@
 import os
 import torch
 import numpy as np
-from env.env_builder import SFEnv  # replace with actual path if needed
+from env.env_sf import SFEnv  # replace with actual path if needed
 from agent.PPO_agent import PPOModel, PPOAgent  # replace with your PPO code file/module
 import time
 
@@ -12,7 +12,7 @@ import time
 ENV_XML = "half_cheetah.xml"   # path to your MuJoCo XML
 OBS_DIM = 17                   # set appropriately (self.obs_dim)
 N_ACTIONS = 6                  # set appropriately (env.model.nu)
-IS_DISCRETE = False            # HalfCheetah is continuous
+IS_DISCRETE = True           # HalfCheetah is continuous
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Training hyperparameters
@@ -27,12 +27,28 @@ EPOCHS = 10
 VALUE_COEF = 0.5
 ENTROPY_COEF = 0.02
 
+
 # -------------------------------
-# Training function
+# Testing / Visualization function
 # -------------------------------
-def train_ppo(xml_path, total_updates, num_steps_per_update, model_save_path):
-    env = SFEnv(xml_path)
-    model = PPOModel(env.obs_dim, env.model.nu, IS_DISCRETE)
+def test_ppo(model_save_path,model_name = None, episodes=100,  device=None):
+    """
+    Test a trained PPO model independently.
+
+    
+    """
+    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Create environment
+    env = SFEnv()
+    #print(env.action_space)
+    model = PPOModel(env.obs_dim, len(env.action_space), IS_DISCRETE)
+
+    # Load model
+    model.load_state_dict(torch.load(os.path.join(model_save_path, model_name), map_location=DEVICE))
+    model.to(device)
+
+    # Create PPO agent
     agent = PPOAgent(
         env,
         model,
@@ -47,62 +63,21 @@ def train_ppo(xml_path, total_updates, num_steps_per_update, model_save_path):
         device=DEVICE
     )
 
-    print("Starting PPO training...")
-    agent.train(num_steps_per_update=NUM_STEPS_PER_UPDATE, total_updates=TOTAL_UPDATES)
-    print("Training completed.")
-
-    # Save the trained model
-    torch.save(model.state_dict(), os.path.join(model_save_path, "ppo_model.pth"))
-    print("Model saved as ppo_model.pth")
-    return env, agent
-
-# -------------------------------
-# Testing / Visualization function
-# -------------------------------
-def test_ppo(model_path="ppo_model.pth", xml_path="half_cheetah.xml", episodes=5, render=True, device=None):
-    """
-    Test a trained PPO model independently.
-
-    Args:
-        model_path (str): Path to the saved PPO model weights.
-        xml_path (str): Path to MuJoCo XML environment.
-        episodes (int): Number of episodes to run.
-        render (bool): Whether to render the environment.
-        device (str or torch.device): 'cpu' or 'cuda'. Default auto-detect.
-    """
-    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-
-    # Create environment
-    env = SFEnv(xml_path)
-    obs_dim = env.obs_dim
-    n_actions = env.action_space.shape[0]
-    is_discrete = False  
-
-    # Load model
-    model = PPOModel(obs_dim, n_actions, is_discrete)
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model.to(device)
-
-    # Create PPO agent
-    agent = PPOAgent(env, model, device=device)
-
     # Run episodes
     for ep in range(episodes):
         obs = env.reset()
         done = False
         total_reward = 0.0
         while not done:
-            obs_tensor = torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(agent._device)
+            obs_tensor = torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(device)
             with torch.no_grad():
-                action, _, _ = agent.get_action(obs_tensor)
+                action, _, _,dist = agent.get_action(obs_tensor)
             action = action.cpu().numpy().squeeze()
 
-            obs, reward, done, _ = env.step(action)
+            obs, reward, done, _ = env.step(dist,test=True)
             total_reward += reward
 
-            if render:
-                env.render()
-                time.sleep(0.01)
+            
 
         print(f"Episode {ep+1} reward: {total_reward}")
 
@@ -114,11 +89,12 @@ def test_ppo(model_path="ppo_model.pth", xml_path="half_cheetah.xml", episodes=5
 # -------------------------------
 if __name__ == "__main__":
     # Example usage
-    xml_path = "half_cheetah.xml"
-    model_path = os.path.join("output", f"ppo_model.pth")
+    
+    model_save_path = os.path.join("output")
+    model_name="ppo_model_20251206_120304.pth"
 
     # Train
     #train_ppo(xml_path=xml_path, total_updates=1000, num_steps_per_update=2048, model_save_path=model_path)
 
     # Test
-    test_ppo(model_path=model_path, xml_path=xml_path, episodes=5, render=True)
+    test_ppo(model_save_path,model_name ,  episodes=100)

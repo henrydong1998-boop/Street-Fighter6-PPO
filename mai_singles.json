@@ -1,0 +1,242 @@
+{
+    "1": {
+        "name": "combo1",
+        "actions": [
+            "LKickH",
+            "LKickR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "2": {
+        "name": "combo2",
+        "actions": [
+            "MKickH",
+            "MKickR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "3": {
+        "name": "combo3",
+        "actions": [
+            "HKickH",
+            "HKickR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "4": {
+        "name": "combo4",
+        "actions": [
+            "LPunchH",
+            "LPunchR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "5": {
+        "name": "combo5",
+        "actions": [
+            "MPunchH",
+            "MPunchR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "6": {
+        "name": "combo6",
+        "actions": [
+            "HPunchH",
+            "HPunchR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "7": {
+        "name": "combo7",
+        "actions": [
+            "DownH",
+            "DownR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "8": {
+        "name": "super1",
+        "actions": [
+            "UpH",
+            "UpR"
+        ],
+        "wait_frames": [
+            1,
+            1
+        ],
+        "combo_breaks": [
+            1,
+            -1
+        ]
+    },
+    "9": {
+        "name": "super2",
+        "actions": [
+            "FrontH",
+            "FrontR",
+            "FrontH",
+            "FrontR"
+        ],
+        "wait_frames": [
+            5,
+            5,
+            5,
+            5
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    },
+    "10": {
+        "name": "super3",
+        "actions": [
+            "BackH",
+            "BackR",
+            "BackH",
+            "BackR"
+        ],
+        "wait_frames": [
+            5,
+            5,
+            5,
+            5
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    },
+    "11": {
+        "name": "guard",
+        "actions": [
+            "BackH"
+        ],
+        "wait_frames": [
+            10
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    },
+    "12": {
+        "name": "guard_lower",
+        "actions": [
+            "BackH",
+            "DownH"
+        ],
+        "wait_frames": [
+            0,
+            10
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    },
+    "13": {
+        "name": "drive_impact",
+        "actions": [
+            "DriveImpact"
+        ],
+        "wait_frames": [
+            30
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    },
+    "14": {
+        "name": "move_backward",
+        "actions": [
+            "BackH"
+        ],
+        "wait_frames": [
+            1
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    },
+    "15": {
+        "name": "move_forward",
+        "actions": [
+            "FrontH"
+        ],
+        "wait_frames": [
+            1
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    },
+    "16": {
+        "name": "throw",
+        "actions": [
+            "FrontH",
+            "LPunchH",
+            "LKickH",
+            "LPunchR",
+            "LKickR",
+            "FrontR"
+        ],
+        "wait_frames": [
+            5,
+            0,
+            2,
+            1,
+            30,
+            1
+        ],
+        "combo_breaks": [
+            -1
+        ]
+    }
+}

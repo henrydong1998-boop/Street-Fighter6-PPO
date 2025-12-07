@@ -20,7 +20,7 @@ class SFEnv:
 
     def __init__(self):
         self.itr = 0
-        self.input_manager = inpm.InputManager("./mai_combos.json")
+        self.input_manager = inpm.InputManager("./mai_singles.json")
 
         # ---- Action & observation spaces ----
         # self.action_space = np.array([e.value for e in self.input_manager.InputClass], dtype=int)
@@ -65,7 +65,7 @@ class SFEnv:
         self.itr = 0
         return obs
 
-    def step(self, dist):
+    def step(self, dist,test=False):
         # action = np.clip(action, -1, 1)
         action_probs = dist.probs.squeeze(0)
         print(f'action: {action_probs}')
@@ -73,7 +73,11 @@ class SFEnv:
         action_probs[filter == False] = 0.0
         probs_modified = action_probs.clone()
         probs_normalized = probs_modified / probs_modified.sum()
-        action = int(torch.multinomial(probs_normalized, num_samples=1))
+        #action = int(torch.multinomial(probs_normalized, num_samples=1))
+        if test==True:
+            action = int(torch.argmax(probs_normalized))
+        else:
+            action = int(torch.multinomial(probs_normalized, num_samples=1))
 
         self.input_manager.update_facing(self.actor_bbox, self.opponent_bbox)
         self.input_manager.accept_prediction(action)
