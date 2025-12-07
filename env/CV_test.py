@@ -86,7 +86,7 @@ def CV_test(camera, model, model2):
 
 
     embed_layers = [10]
-    embed = model2.predict(frame, embed=embed_layers)[0]  
+    embed = model2.predict(frame, embed=embed_layers)[0]
 
     buffer, cache32 = update_buffer_svd(buffer=buffer, new_embed=embed, window_size=4, out_dim=32)
 
