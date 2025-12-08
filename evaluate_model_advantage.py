@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 import cv2
 import numpy as np
@@ -17,7 +18,7 @@ def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
     BEGIN_HSV_CRITICAL = np.array([30, 143, 253])
     END_HSV_CRITICAL = np.array([24, 169, 253])
 
-    HSV_TOLERANCE = 10
+    HSV_TOLERANCE = 20
     MIN_HSV = np.array([0, 0, 0])
     MAX_HSV = np.array([255, 255, 255])
 
@@ -49,14 +50,64 @@ def extract_health_info(bgr_frame: np.ndarray) -> tuple[float, float]:
     opponent_health = max(opponent_health_normal, opponent_health_critical) / opponent_healthbar_len
     return (actor_health, opponent_health)
 
+def extract_match_info(start_times: list[int] | None, end_times: list[int], advantages: list[float]) -> str:
+    win_rate = len(list(filter(lambda advantages: advantages > 0, advantages))) / len(advantages)
+    average_advantages = sum(advantages) / len(advantages)
+    match_durations = []
+    average_duration = "N/a"
+    if start_times is not None:
+        assert len(start_times) == len(end_times)
+        for i in range(len(start_times)):
+            match_durations.append(end_times[i] - start_times[i])
+        average_duration = sum(match_durations) / len(match_durations)
+        return f"win rate: [{win_rate: 2.0%}], " + \
+               f"average advantage: [{average_advantages: 2.0%}], " + \
+               f"average duration: [{average_duration: 2.1f}s]"
+    return f"win rate: [{win_rate: 2.0%}], "+ \
+           f"average advantage: [{average_advantages: 2.0%}], "+ \
+           f"average duration: [{average_duration}]"
+
 if __name__ == "__main__":
     args_parser = ArgumentParser()
     args_parser.add_argument("-s","--source", dest="source", default=None)
+    args_parser.add_argument("-d","--dest", dest="dest", default=None)
+    args_parser.add_argument("--start_times", dest="start_times", default=None)
     args = args_parser.parse_args()
-    source_file = args.source
-    assert(source_file)
-    source_bgr_frame = cv2.imread(source_file)
-    cropped_bgr_frame = source_bgr_frame[32: 1080 + 32, 0: 1920, :]
-    actor_health, opponent_health = extract_health_info(cropped_bgr_frame)
-    health_advantage = actor_health - opponent_health
-    print(f"Actor Health: [{actor_health: .0%}], Opponent Health: [{opponent_health: .0%}], Health Advantage:[{health_advantage: .0%}]")
+    source_path = args.source
+    source_files = [source_path]
+    start_times = None
+    end_times = []
+    health_advantages = []
+
+    if os.path.isdir(source_path):
+        source_files = os.listdir(source_path)
+        source_files = filter(lambda filename: filename.endswith((".png", ".jpg", ".jpeg")), source_files)
+        source_files = map(lambda filename: os.path.join(source_path, filename), source_files)
+
+    for source_file in source_files:
+        assert(source_file and source_file.endswith((".png", ".jpg", ".jpeg")))
+        source_bgr_frame = cv2.imread(source_file)
+        cropped_bgr_frame = source_bgr_frame[32: 1080 + 32, 0: 1920, :]
+        actor_health, opponent_health = extract_health_info(cropped_bgr_frame)
+        health_advantage = actor_health - opponent_health
+        health_advantages.append(health_advantage)
+        print(f"{source_file} >>> Actor Health: [{actor_health: 2.0%}], " + \
+              f"Opponent Health: [{opponent_health: 2.0%}], " + \
+              f"Health Advantage:[{health_advantage: 2.0%}]")
+        filename = str(os.path.basename(source_file))
+        name, extension = filename.split(".")
+        minutes, seconds = name.split("_")
+        end_times.append(int(minutes) * 60 + int(seconds))
+
+    if args.start_times is not None:
+        lines = list(open(args.start_times))
+        start_times = []
+        for line in lines:
+            minutes, seconds = line.split("_")
+            start_times.append(int(minutes) * 60 + int(seconds))
+    match_info = f"{source_path} >>> " + extract_match_info(start_times, end_times, health_advantages)
+    print(match_info)
+
+    if args.dest is not None:
+        with open(args.dest, "a") as file:
+            file.write(match_info + "\n")
